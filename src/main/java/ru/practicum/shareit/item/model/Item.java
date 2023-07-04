@@ -14,9 +14,9 @@ import javax.validation.constraints.NotNull;
 public class Item {
     private int id;
     private int ownerId;
-    @NotBlank(message = "Название вещи не может быть пустым")
+    @NotBlank(message = "The name of the item cannot be empty")
     private String name;
-    @NotBlank(message = "Описание вещи не может быть пустым")
+    @NotBlank(message = "The description of a thing cannot be empty")
     private String description;
     @NotNull
     private Boolean available;

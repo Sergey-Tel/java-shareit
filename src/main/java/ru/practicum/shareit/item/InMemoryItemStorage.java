@@ -27,7 +27,7 @@ public class InMemoryItemStorage implements ItemStorage {
         if (storageMap.containsKey(itemId)) {
             return storageMap.get(itemId);
         } else {
-            throw new ItemNotFoundException("Вещь не найдена");
+            throw new ItemNotFoundException("Item not found");
         }
     }
 
@@ -41,7 +41,7 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public Item create(Item item, int ownerId) throws InvalidItemOwnerException {
         if (userStorage.getById(ownerId) == null) {
-            throw new InvalidItemOwnerException("Владелец с указанным id не существует");
+            throw new InvalidItemOwnerException("The owner with the specified id does not exist");
         } else {
             if (item != null) {
                 item.setId(++nextId);
@@ -64,10 +64,10 @@ public class InMemoryItemStorage implements ItemStorage {
                         storageItem.setDescription(item.getDescription());
                     if (item.getAvailable() != null) storageItem.setAvailable(item.getAvailable());
                 } else {
-                    throw new ItemAccessDeniedException("Вещь принадлежит другому пользователю");
+                    throw new ItemAccessDeniedException("The item belongs to another user");
                 }
             } else {
-                throw new ItemNotFoundException("Вещь не найдена");
+                throw new ItemNotFoundException("Item not found");
             }
 
             return storageItem;
@@ -83,10 +83,10 @@ public class InMemoryItemStorage implements ItemStorage {
             if (storageItem.getOwnerId() == ownerId) {
                 storageMap.remove(itemId);
             } else {
-                throw new ItemAccessDeniedException("Вещь принадлежит другому пользователю");
+                throw new ItemAccessDeniedException("The item belongs to another user");
             }
         } else {
-            throw new ItemNotFoundException("Вещь не найдена");
+            throw new ItemNotFoundException("Item not found");
         }
     }
 

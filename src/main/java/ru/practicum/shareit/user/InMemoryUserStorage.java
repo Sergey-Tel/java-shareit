@@ -19,7 +19,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (storageMap.containsKey(userId)) {
             return storageMap.get(userId);
         } else {
-            throw new UserNotFoundException("Пользователь не найден");
+            throw new UserNotFoundException("User not found");
         }
     }
 
@@ -46,7 +46,7 @@ public class InMemoryUserStorage implements UserStorage {
                 if (user.getEmail() != null && !user.getEmail().isBlank()) storageUser.setEmail(user.getEmail());
                 if (user.getName() != null && !user.getName().isBlank()) storageUser.setName(user.getName());
             } else {
-                throw new UserNotFoundException("Пользователь не найден");
+                throw new UserNotFoundException("User not found");
             }
 
             return storageUser;

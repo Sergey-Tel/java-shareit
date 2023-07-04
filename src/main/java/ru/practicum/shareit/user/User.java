@@ -13,10 +13,10 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class User {
     private int id;
-    @NotBlank(message = "Имя пользователя не может быть пустым")
+    @NotBlank(message = "The user name cannot be empty")
     private String name;
-    @Email(message = "Электронная почта указана неверно")
-    @NotBlank(message = "Электронная почта не может быть пустой")
+    @Email(message = "The email address is incorrect")
+    @NotBlank(message = "Email cannot be empty")
     private String email;
 
 }

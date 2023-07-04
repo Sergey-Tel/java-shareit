@@ -29,7 +29,7 @@ public class ItemController {
             throws ValidationException {
         log.info("Create item, owner {}: " + item.toString(), ownerId);
         if (ownerId <= 0) {
-            throw new ValidationException("Указан ошибочный id владельца");
+            throw new ValidationException("An erroneous owner id is specified");
         }
 
         return ItemDtoMapper.toItemDto(itemService.create(item, ownerId));
@@ -41,7 +41,7 @@ public class ItemController {
             throws ValidationException {
         log.info("Update item {}, ownerId {}: " + itemDto, itemId, ownerId);
         if (ownerId <= 0) {
-            throw new ValidationException("Указан ошибочный id владельца");
+            throw new ValidationException("An erroneous owner id is specified");
         }
 
         itemDto.setId(itemId);
@@ -55,7 +55,7 @@ public class ItemController {
     public List<ItemDto> getOwnedItemsList(@RequestHeader(value = xHeaderName, defaultValue = "0") int ownerId) {
         log.info("Get owned items list, ownerId {}", ownerId);
         if (ownerId <= 0) {
-            throw new ValidationException("Указан ошибочный id владельца");
+            throw new ValidationException("An erroneous owner id is specified");
         }
 
         return ItemDtoMapper.toItemDtoList(itemService.getOwnedItemsList(ownerId));
@@ -84,7 +84,7 @@ public class ItemController {
     public void delete(@PathVariable int itemId, @RequestHeader(value = xHeaderName, defaultValue = "0") int ownerId) {
         log.info("Delete itemId {}, ownerId {}", itemId, ownerId);
         if (ownerId <= 0) {
-            throw new ValidationException("Указан ошибочный id владельца");
+            throw new ValidationException("An erroneous owner id is specified");
         }
 
         itemService.delete(itemId, ownerId);

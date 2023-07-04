@@ -12,6 +12,6 @@ public class UserDto {
 
     private String name;
 
-    @Email(message = "Электронная почта указана неверно")
+    @Email(message = "The email address is incorrect")
     private String email;
 }
