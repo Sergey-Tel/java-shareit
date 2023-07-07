@@ -12,20 +12,16 @@ import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
 public class ItemController {
     private final ItemService itemService;
-    private final String xHeaderName = "X-Sharer-User-Id";
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto create(@Valid @RequestBody Item item, @RequestHeader(value = xHeaderName, defaultValue = "0") int ownerId)
+    public ItemDto create(@Valid @RequestBody Item item, @RequestHeader(value = ItemHeader.X_HEADER_NAME, defaultValue = "0") int ownerId)
             throws ValidationException {
         log.info("Create item, owner {}: " + item.toString(), ownerId);
         if (ownerId <= 0) {
@@ -37,7 +33,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemDto update(@PathVariable int itemId, @Valid @RequestBody ItemDto itemDto, @RequestHeader(value = xHeaderName, defaultValue = "0") int ownerId)
+    public ItemDto update(@PathVariable int itemId, @Valid @RequestBody ItemDto itemDto, @RequestHeader(value = ItemHeader.X_HEADER_NAME, defaultValue = "0") int ownerId)
             throws ValidationException {
         log.info("Update item {}, ownerId {}: " + itemDto, itemId, ownerId);
         if (ownerId <= 0) {
@@ -52,7 +48,7 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemDto> getOwnedItemsList(@RequestHeader(value = xHeaderName, defaultValue = "0") int ownerId) {
+    public List<ItemDto> getOwnedItemsList(@RequestHeader(value = ItemHeader.X_HEADER_NAME, defaultValue = "0") int ownerId) {
         log.info("Get owned items list, ownerId {}", ownerId);
         if (ownerId <= 0) {
             throw new ValidationException("An erroneous owner id is specified");
@@ -81,7 +77,7 @@ public class ItemController {
 
     @DeleteMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable int itemId, @RequestHeader(value = xHeaderName, defaultValue = "0") int ownerId) {
+    public void delete(@PathVariable int itemId, @RequestHeader(value = ItemHeader.X_HEADER_NAME, defaultValue = "0") int ownerId) {
         log.info("Delete itemId {}, ownerId {}", itemId, ownerId);
         if (ownerId <= 0) {
             throw new ValidationException("An erroneous owner id is specified");
