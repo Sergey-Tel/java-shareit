@@ -2,15 +2,15 @@ package ru.practicum.shareit.user.storage;
 
 import lombok.Getter;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exceptions.ConflictException;
-import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
 
 import java.util.*;
 
 @Component
 @Getter
-public class InMemoryUserStorage implements UserStorage {
+public class InMemoryUserStorage {
     private final Map<Long, User> userStorageMap = new HashMap<>();
     private final List<String> emailList = new ArrayList<>();
     private long userId = 1;

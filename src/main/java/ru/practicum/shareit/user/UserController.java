@@ -40,4 +40,3 @@ public class UserController {
         return userService.updateUser(userDto, id);
     }
 }
-
