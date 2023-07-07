@@ -1,107 +1,43 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exceptions.UserEmailNotUniqueException;
+import ru.practicum.shareit.Create;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
 
-import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
-@Slf4j
 public class UserController {
     private final UserService userService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@Valid @RequestBody User user) {
-        log.info("Create user: " + user.toString());
-
-        UserValidator.validate(user, userService);
-
-        return UserDtoMapper.toUserDto(userService.create(user));
-    }
-
-    @PatchMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public UserDto update(@PathVariable int userId, @Valid @RequestBody UserDto userDto) {
-        userDto.setId(userId);
-        log.info("Update user {}: " + userDto, userId);
-
-        User user = UserDtoMapper.toUser(userDto);
-
-        UserValidator.validate(user, userService);
-
-        return UserDtoMapper.toUserDto(userService.update(user));
+    public UserDto createUser(@Validated({Create.class}) @RequestBody UserDto userDto) {
+        return userService.createUser(userDto);
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> getAll() {
-        log.info("Get all users");
-        return UserDtoMapper.toUserDtoList(userService.getAll());
+    public List<UserDto> getAllUsers() {
+        return userService.getAllUsers();
     }
 
-    @GetMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public UserDto get(@PathVariable int userId) {
-        log.info("Get userId {}", userId);
-        return UserDtoMapper.toUserDto(userService.getById(userId));
+    @GetMapping("{id}")
+    public UserDto getUserById(@PathVariable long id) {
+        return userService.findUserById(id);
     }
 
-    @DeleteMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable int userId) {
-        log.info("Delete userId {}", userId);
-        userService.delete(userId);
+    @DeleteMapping("{id}")
+    public UserDto deleteUser(@PathVariable long id) {
+        return userService.deleteUserById(id);
     }
 
-    private static class UserValidator {
-        public static void validate(User user, UserService userService) throws UserEmailNotUniqueException {
-            boolean isNewUser = user.getId() == 0;
-            String userEmail = user.getEmail();
-
-            if (isNewUser || userEmail != null && !userEmail.isBlank()) {
-                List<User> allUsers = userService.getAll();
-                for (User userEntry : allUsers) {
-                    if (userEntry.getEmail().equals(userEmail)) {
-                        if (isNewUser || userEntry.getId() != user.getId()) {
-                            throw new UserEmailNotUniqueException("E-mail не уникален");
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private static class UserDtoMapper {
-
-        public static User toUser(UserDto userDto) {
-            if (userDto != null) return new User(userDto.getId(), userDto.getName(), userDto.getEmail());
-            else return null;
-        }
-
-        public static UserDto toUserDto(User user) {
-            if (user != null) return new UserDto(user.getId(), user.getName(), user.getEmail());
-            else return null;
-        }
-
-        public static List<UserDto> toUserDtoList(List<User> userList) {
-            List<UserDto> userDtoList = new ArrayList<>();
-
-            if (userList != null) {
-                for (User user : userList) {
-                    userDtoList.add(toUserDto(user));
-                }
-            }
-
-            return userDtoList;
-        }
+    @PatchMapping("{id}")
+    public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable long id) {
+        return userService.updateUser(userDto, id);
     }
 }
+

@@ -5,55 +5,32 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exceptions.InvalidItemOwnerException;
-import ru.practicum.shareit.exceptions.ItemAccessDeniedException;
-import ru.practicum.shareit.exceptions.UserEmailNotUniqueException;
-import ru.practicum.shareit.exceptions.UserNotFoundException;
-
-import javax.validation.ValidationException;
+import ru.practicum.shareit.exceptions.BadRequestException;
+import ru.practicum.shareit.exceptions.ConflictException;
+import ru.practicum.shareit.exceptions.NotFoundException;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
-        log.info(e.getMessage());
-        return new ErrorResponse("error", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleInvalidItemOwnerException(final InvalidItemOwnerException e) {
-        log.info(e.getMessage());
-        return new ErrorResponse("error", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleItemAccessDeniedException(final ItemAccessDeniedException e) {
-        log.info(e.getMessage());
-        return new ErrorResponse("error", e.getMessage());
-    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFoundException(final UserNotFoundException e) {
-        log.info(e.getMessage());
-        return new ErrorResponse("error", e.getMessage());
+    public ErrorResponse handleNotFound(final NotFoundException e) {
+        log.warn("Error not found: {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleUserEmailNotUniqueException(final UserEmailNotUniqueException e) {
-        log.info(e.getMessage());
-        return new ErrorResponse("error", e.getMessage());
+    public ErrorResponse handleConflict(final ConflictException e) {
+        log.warn("Error conflict: {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler({NullPointerException.class, IllegalArgumentException.class})
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse serverExceptionHandler(RuntimeException e) {
-        log.info(e.getMessage(), e);
-        return new ErrorResponse("error", "Internal server error");
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequest(final BadRequestException e) {
+        log.warn("Error bad request: {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 }

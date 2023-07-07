@@ -1,17 +1,19 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import ru.practicum.shareit.Create;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class UserDto {
-    private int id;
-
+    private long id;
+    @NotBlank(groups = {Create.class})
     private String name;
-
-    @Email(message = "The email address is incorrect")
+    @Email(groups = {Create.class})
+    @NotBlank(groups = {Create.class})
     private String email;
 }
