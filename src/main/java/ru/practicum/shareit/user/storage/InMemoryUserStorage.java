@@ -20,14 +20,25 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     public User saveUser(User user) {
-        checkEmail(user);
         if (user.getId() == 0) {
+            checkEmail(user);
             user.setId(setId());
+            emailSet.add(user.getEmail());
+        } else {
+            User existingUser = getUserById(user.getId())
+                    .orElseThrow(() -> new NotFoundException(String.format("User %s not found", user.getId())));
+
+            if (!existingUser.getEmail().equals(user.getEmail())) {
+                checkEmail(user);
+                emailSet.remove(existingUser.getEmail());
+                emailSet.add(user.getEmail());
+            }
         }
-        emailSet.add(user.getEmail());
+
         userStorageMap.put(user.getId(), user);
         return user;
     }
+
 
     public List<User> getAllUsers() {
         return new ArrayList<>(userStorageMap.values());
