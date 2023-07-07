@@ -7,9 +7,10 @@ import java.util.Optional;
 
 public interface UserStorage {
     User saveUser(User user);
+
     List<User> getAllUsers();
+
     Optional<User> getUserById(long id);
+
     User deleteUser(long id);
-
-
 }
