@@ -2,17 +2,17 @@ package ru.practicum.shareit.user.storage;
 
 import lombok.Getter;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exceptions.ConflictException;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.User;
 
 import java.util.*;
 
 @Component
 @Getter
-public class InMemoryUserStorage {
+public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> userStorageMap = new HashMap<>();
-    private final List<String> emailList = new ArrayList<>();
+    private final Set<String> emailSet = new HashSet<>();
     private long userId = 1;
 
     private long setId() {
@@ -24,7 +24,7 @@ public class InMemoryUserStorage {
         if (user.getId() == 0) {
             user.setId(setId());
         }
-        emailList.add(user.getEmail());
+        emailSet.add(user.getEmail());
         userStorageMap.put(user.getId(), user);
         return user;
     }
@@ -39,13 +39,14 @@ public class InMemoryUserStorage {
 
     public User deleteUser(long id) {
         User user = getUserById(id).orElseThrow(() -> new NotFoundException(String.format("User %s not found", id)));
-        emailList.remove(user.getEmail());
+        emailSet.remove(user.getEmail());
         return userStorageMap.remove(id);
     }
 
     private void checkEmail(User user) {
-        if (emailList.contains(user.getEmail())) {
-            throw new ConflictException("email already used");
+        if (emailSet.contains(user.getEmail())) {
+            throw new ConflictException("Email already used");
         }
     }
+
 }

@@ -3,8 +3,8 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exceptions.ConflictException;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -57,7 +57,7 @@ public class UserService {
         if (userDto.getEmail() != null) {
             log.info("Update user with id: {} email {}", id, userDto.getEmail());
             user.setEmail(userDto.getEmail());
-            userStorage.getEmailList().add(userDto.getName());
+            userStorage.getEmailSet().add(userDto.getName());
         }
         userStorage.saveUser(user);
         log.info("Update user with id: {}", id);
@@ -65,7 +65,7 @@ public class UserService {
     }
 
     private void checkUserEmail(UserDto userDto, long id) {
-        if (userStorage.getEmailList().contains(userDto.getEmail())) {
+        if (userStorage.getEmailSet().contains(userDto.getEmail())) {
             log.warn("Users with id: {} tried update email {} already exist ", id, userDto.getEmail());
             throw new ConflictException("Cannot update email, email already used");
         }
