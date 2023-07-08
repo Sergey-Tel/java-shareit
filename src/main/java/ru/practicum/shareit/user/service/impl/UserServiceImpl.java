@@ -1,70 +1,80 @@
 package ru.practicum.shareit.user.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.ConflictException;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.dto.UserRequestDto;
+import ru.practicum.shareit.user.dto.UserResponseDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.user.storage.UserStorage;
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
-    private final UserStorage userStorage;
+    private Long id = 1L;
+    @Getter
+    private final Map<Long, User> userMap = new HashMap<>();
 
     @Override
-    public Collection<UserDto> findAll() {
-        return UserMapper.allToUserDto(userStorage.findAll());
+    public UserResponseDto addUser(UserRequestDto userRequestDto) {
+        User user = UserMapper.fromUserRequestDto(userRequestDto);
+        checkUniqueEmail(user.getEmail());
+        user.setId(id);
+        id++;
+        userMap.put(user.getId(), user);
+        log.debug("Пользователь с id= {} добавлен", user.getId());
+        return UserMapper.toUserResponseDto(user);
     }
 
     @Override
-    public UserDto findById(Integer id) {
-        return UserMapper.toUserDto(userStorage.findById(id));
+    public UserResponseDto updateUser(UserRequestDto userRequestDto, Long userId) {
+        checkUserExistsById(userId);
+        checkUniqueEmail(userRequestDto.getEmail());
+        User user = userMap.get(userId);
+        Optional.ofNullable(userRequestDto.getName()).ifPresent(user::setName);
+        Optional.ofNullable(userRequestDto.getEmail()).ifPresent(user::setEmail);
+        userMap.put(userId, user);
+        log.debug("Обновлен пользователь с id = {}", userId);
+        return UserMapper.toUserResponseDto(user);
     }
 
     @Override
-    public UserDto create(UserDto userDto) {
-        if (isEmailFound(userDto.getEmail())) {
-            throw new ConflictException("Пользователь с такой почтой уже есть");
+    public UserResponseDto getUserById(Long userId) {
+        checkUserExistsById(userId);
+        log.debug("Получен пользователь с id = {}", userId);
+        return UserMapper.toUserResponseDto(userMap.get(userId));
+    }
+
+    @Override
+    public void deleteUserById(Long userId) {
+        checkUserExistsById(userId);
+        userMap.remove(userId);
+        log.debug("Удален пользователь с id = {}", userId);
+    }
+
+    @Override
+    public List<UserResponseDto> getUsers() {
+        log.debug("Найдены все пользователи");
+        return UserMapper.toUserResponseDtoList(userMap.values());
+    }
+
+    private void checkUserExistsById(Long userId) {
+        if (!userMap.containsKey(userId)) {
+            throw new RuntimeException("Пользователя с таким id не существует");
         }
-        return UserMapper.toUserDto(userStorage.create(UserMapper.toUser(userDto)));
     }
 
-    @Override
-    public UserDto update(Integer userId, UserDto userDto) {
-        userStorage.findById(userId);
-        User newUser = userStorage.findById(userId);
-        if (userDto.getEmail() != null) {
-            if (!isEmailFound(userDto.getEmail()) || newUser.getEmail().equals(userDto.getEmail())) {
-                newUser = newUser.toBuilder().email(userDto.getEmail()).build();
-                log.info("Задаем новую почту пользователю - {}", userDto.getEmail());
-            } else throw new ConflictException("Пользователь с такой почтой уже есть");
-        }
-        if (userDto.getName() != null) {
-            newUser = newUser.toBuilder().name(userDto.getName()).build();
-            log.info("Задаем новое имя пользователю - {}", userDto.getName());
-        }
-        return UserMapper.toUserDto(userStorage.update(userId, newUser));
-    }
-
-    @Override
-    public void delete(Integer userId) {
-        userStorage.softDelete(userId);
-    }
-
-    private Boolean isEmailFound(String email) {
-        for (User currentUser : userStorage.findAll()) {
-            if (currentUser.getEmail().equals(email)) {
-                return true;
+    private void checkUniqueEmail(String email) {
+        for (User user1 : userMap.values()) {
+            if (user1.getEmail().equals(email)) {
+                throw new RuntimeException("Пользователь с данной почтой уже зарегестрирован");
             }
         }
-        return false;
     }
 }
