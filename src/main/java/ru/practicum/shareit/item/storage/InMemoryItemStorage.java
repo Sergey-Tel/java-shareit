@@ -3,97 +3,89 @@ package ru.practicum.shareit.item.storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.itemExeption.UnknownItemException;
-import ru.practicum.shareit.exception.userExeption.UnknownUserException;
+import ru.practicum.shareit.exceptions.EntityNotFoundException;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.validator.ItemValidator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-@Component
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class InMemoryItemStorage implements ItemStorage {
 
-    private final HashMap<Long, Item> items = new HashMap<>();
-    private final ItemValidator itemValidator;
+    private final Map<Integer, Map<Integer, Item>> items = new HashMap<>();
+    private int id = 1;
+
 
     @Override
-    public Item create(Item item) {
-        itemValidator.validate(item);
+    public Collection<Item> findAll(Integer userId) {
+        Map<Integer, Item> userItems = items.get(userId);
+        if (userItems == null) {
+            return new ArrayList<>();
+        }
+        return userItems.values();
+    }
 
-        items.put(item.getId(), item);
-        log.debug("Создан объект вещи: {}", item);
+    @Override
+    public Item findById(Integer itemId) {
+        return giveAllItem().get(itemId);
+    }
+
+    @Override
+    public Item create(Integer userId, Item item) {
+        if (!items.containsKey(userId)) {
+            items.put(userId, new HashMap<>());
+            log.info("Создали место для вещей пользователю с id - {}", userId);
+        }
+        item = item.withId(id);
+        items.get(userId).put(id, item);
+        id++;
+        log.info("Создали новую вещь {}", item);
         return item;
     }
 
     @Override
-    public Item update(Item item, Long itemId, Long ownerId) {
-        if (ownerId == null || !Objects.equals(items.get(itemId).getOwnerId(), ownerId)) {
-            throw new UnknownUserException("редактировать вещь может только владелец");
-        }
-
-        if (!items.containsKey(itemId)) {
-            log.error("вещи с id={} не существует", itemId);
-            throw new UnknownItemException("попытка обновить несуществующую вещь");
-        }
-
-        if (item.getName() != null) {
-            items.get(itemId).setName(item.getName());
-        }
-
-        if (item.getDescription() != null) {
-            items.get(itemId).setDescription(item.getDescription());
-        }
-
-        if (item.getAvailable() != null) {
-            items.get(itemId).setAvailable(item.getAvailable());
-        }
-
-        log.debug("Изменён объект вещи: {}", item);
-        return items.get(itemId);
+    public Item update(Integer userId, ItemDto itemDto, Integer itemId) {
+        if (items.get(userId).containsKey(itemId)) {
+            Item newItem = items.get(userId).get(itemId);
+            if (itemDto.getAvailable() != null) {
+                newItem = newItem.withAvailable(itemDto.getAvailable());
+                log.info("Задали новый статус вещи {}", itemDto.getAvailable());
+            }
+            if (itemDto.getDescription() != null) {
+                newItem = newItem.toBuilder().description(itemDto.getDescription()).build();
+                log.info("Задали новое описание вещи {}", itemDto.getDescription());
+            }
+            if (itemDto.getName() != null) {
+                newItem = newItem.toBuilder().name(itemDto.getName()).build();
+                log.info("Задали новое название вещи {}", itemDto.getName());
+            }
+            items.get(userId).put(itemId, newItem);
+            return newItem;
+        } else throw new EntityNotFoundException("Не найдена вещь для обновления");
     }
 
     @Override
-    public Item getItem(Long itemId) {
-        if (!items.containsKey(itemId)) {
-            log.error("вещи с id={} не существует", itemId);
-            throw new UnknownItemException("попытка получить несуществующую вещь");
+    public List<Item> search(String text) {
+        List<Item> foundItem = new ArrayList<>();
+        if (text.isBlank()) {
+            return foundItem;
         }
-        return items.get(itemId);
-    }
-
-    @Override
-    public List<Item> getItemsByOwner(Long ownerId) {
-        List<Item> itemList = new ArrayList<>();
-
-        for (Long itemId : items.keySet()) {
-            if (Objects.equals(items.get(itemId).getOwnerId(), ownerId)) {
-                itemList.add(items.get(itemId));
+        for (Item currentItem : giveAllItem().values()) {
+            if (currentItem.getAvailable() && (currentItem.getName().toLowerCase().contains(text.toLowerCase()) ||
+                    currentItem.getDescription().toLowerCase().contains(text.toLowerCase()))) {
+                foundItem.add(currentItem);
             }
         }
-        return itemList;
+        return foundItem;
     }
 
-    @Override
-    public List<Item> searchItem(String text) {
-        List<Item> itemList = new ArrayList<>();
-        String query = text.toLowerCase();
-
-        if (query.trim().length() == 0) {
-            return itemList;
+    private Map<Integer, Item> giveAllItem() {
+        Map<Integer, Item> allItems = new HashMap<>();
+        for (Map<Integer, Item> currentItems : items.values()) {
+            allItems.putAll(currentItems);
         }
-
-        for (Long itemId : items.keySet()) {
-            if (items.get(itemId).getName().toLowerCase().contains(query) ||
-                    items.get(itemId).getDescription().toLowerCase().contains(query) &&
-                            items.get(itemId).getAvailable().equals(true)) {
-                itemList.add(items.get(itemId));
-            }
-        }
-        return itemList;
+        return allItems;
     }
 }

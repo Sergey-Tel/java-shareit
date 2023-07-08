@@ -2,89 +2,53 @@ package ru.practicum.shareit.user.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.userExeption.ConflictUserException;
-import ru.practicum.shareit.exception.userExeption.UnknownUserException;
+import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.validator.UserValidator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@Component
 @Slf4j
+@Component
 public class InMemoryUserStorage implements UserStorage {
 
-    private final HashMap<Long, User> users = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
+    private int id = 1;
 
     @Override
-    public List<User> getAll() {
-        return new ArrayList<>(users.values());
+    public Collection<User> findAll() {
+        return users.values().stream().filter(a -> !a.getIsDeleted()).collect(Collectors.toList());
     }
 
     @Override
-    public User getUser(Long userId) {
-        if (!users.containsKey(userId)) {
-            log.error("пользователя с id={} не существует", userId);
-            throw new UnknownUserException("попытка получить несуществующего пользователя");
-        }
-        return users.get(userId);
+    public User findById(Integer id) {
+        if (users.containsKey(id)) {
+            if (!users.get(id).getIsDeleted()) {
+                return users.get(id);
+            } else throw new EntityNotFoundException("Не найден пользователь");
+        } else throw new EntityNotFoundException("Не найден пользователь");
     }
 
     @Override
     public User create(User user) {
-        checkEmailExist(user.getEmail());
-        UserValidator.validate(user);
-
-        users.put(user.getId(), user);
-        log.debug("Создан объект пользователя: {}", user);
+        user = user.withId(id).withIsDeleted(false);
+        users.put(id, user);
+        id++;
+        log.info("Создаем пользователя {}", user);
         return user;
     }
 
     @Override
-    public User update(User user, Long userId) {
-        if (user.getName() != null) {
-            UserValidator.loginValidate(user);
-        }
-
-        checkEmailExist(user.getEmail());
-
-        if (!users.containsKey(userId)) {
-            log.error("пользователя с id={} не существует", userId);
-            throw new UnknownUserException("попытка обновить несуществующего пользователя");
-        }
-
-        if (user.getName() != null) {
-            users.get(userId).setName(user.getName());
-        }
-
-        if (user.getEmail() != null) {
-            users.get(userId).setEmail(user.getEmail());
-        }
-
-        log.debug("Изменён объект пользователя: {}", user);
-        return users.get(userId);
-    }
-
-    private void checkEmailExist(String email) {
-        if (email != null) {
-            for (long userId : users.keySet()) {
-                if (users.get(userId).getEmail().equals(email)) {
-                    throw new ConflictUserException("пользователь с таким email уже существует");
-                }
-            }
-        }
+    public User update(Integer userId, User user) {
+        users.put(userId, user);
+        log.info("Обновляем пользователя {}", user);
+        return user;
     }
 
     @Override
-    public User remove(Long userId) {
-        if (!users.containsKey(userId)) {
-            log.error("пользователя с id={} не существует", userId);
-            throw new UnknownUserException("попытка удалить несуществующего пользователя");
-        }
-        User removedUser = users.get(userId);
-        users.remove(userId);
-        log.debug("Удалён объект пользователя: {}", removedUser);
-        return removedUser;
+    public void softDelete(Integer userId) {
+        User user = users.get(userId).withIsDeleted(true);
+        users.put(userId, user);
+        log.info("Удаляем пользователя с id = {}", userId);
     }
 }

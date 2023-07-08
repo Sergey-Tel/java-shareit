@@ -1,44 +1,45 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exceptions.EntityBadRequestException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/items")
+@RequiredArgsConstructor
 public class ItemController {
-
     private final ItemService itemService;
-    private static final String OWNER = "X-Sharer-User-Id";
 
-    @PostMapping
-    public ResponseEntity<ItemDto> create(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
-        return ResponseEntity.ok().body(itemService.create(itemDto, ownerId));
-    }
-
-    @PatchMapping("/{itemId}")
-    public ResponseEntity<ItemDto> update(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
-                          @RequestHeader(OWNER) Long ownerId) {
-        return ResponseEntity.ok().body(itemService.update(itemDto, itemId, ownerId));
+    @GetMapping
+    public Collection<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") int userId) {
+        return itemService.findAll(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
-        return ResponseEntity.ok().body(itemService.getItem(itemId));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ItemDto>> getItemsByOwner(@RequestHeader(OWNER) Long ownerId) {
-        return ResponseEntity.ok().body(itemService.getItemsByOwner(ownerId));
+    public ItemDto findById(@PathVariable Integer itemId) {
+        return itemService.findById(itemId);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDto>> searchItem(@RequestParam String text) {
-        return ResponseEntity.ok().body(itemService.searchItem(text));
+    public Collection<ItemDto> search(@RequestParam String text) {
+        return itemService.search(text);
+    }
+
+    @PostMapping
+    public ItemDto create(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody ItemDto itemDto) {
+        if (itemDto.getAvailable() == null || itemDto.getName().isBlank() || itemDto.getName() == null ||
+                itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            throw new EntityBadRequestException("Не корректные данные в запросе");
+        }
+        return itemService.create(userId, itemDto);
+    }
+
+    @PatchMapping("/{itemId}")
+    public ItemDto update(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody ItemDto itemDto, @PathVariable Integer itemId) {
+        return itemService.update(userId, itemDto, itemId);
     }
 }
