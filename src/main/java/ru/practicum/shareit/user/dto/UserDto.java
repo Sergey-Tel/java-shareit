@@ -1,21 +1,23 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.validate.annotation.EmptyOrNullOrEmail;
-import javax.validation.constraints.*;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
-@Value
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
 public class UserDto {
-
-    Long id;
-
-    @NotEmpty(message = "First name cannot be empty.")
-    @Size(max = 64, message = "First name must consist max 64 letters.")
+    long id;
+    @NotBlank
     String name;
-
-    @EmptyOrNullOrEmail(message = "Invalid email format.")
+    @NotBlank
+    @Email
     String email;
 }

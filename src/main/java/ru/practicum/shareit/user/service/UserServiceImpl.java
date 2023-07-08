@@ -1,65 +1,66 @@
-package ru.practicum.shareit.user.service;
+package ru.practicum.shareit.user.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.Exception.NotFoundException;
+import ru.practicum.shareit.Exception.ValidationException;
+import ru.practicum.shareit.user.Repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserRepository;
-import java.util.ArrayList;
+
 import java.util.List;
 
-
-@Slf4j
 @Service
-@RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+@Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final UserMapper userMapper;
-
     @Override
-    public UserDto add(UserDto userDto) {
-        User added = userRepository.save(userMapper.toEntity(userDto, checkEmail(userDto.getEmail())));
-        log.debug("Added: {} ", added);
-        return userMapper.toUserDto(added);
+    public List<User> findAll() {
+        log.info("Отправлен список пользователей");
+        return userRepository.findAll();
     }
 
     @Override
-    public UserDto update(UserDto userDto, Long userId) {
-        User entity = userMapper.toEntity(userDto, userRepository.getReferenceById(userId));
-        User updated = userRepository.save(entity);
-        log.debug("Updated: {} ", updated);
-        return userMapper.toUserDto(updated);
+    public User getUserById(long userId) {
+        return userRepository.getUserById(userId).orElseThrow(() -> {
+            log.warn("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
+        });
     }
 
     @Override
-    public UserDto findById(Long userId) {
-        User found = userRepository.getReferenceById(userId);
-        log.debug("Found: {}", found);
-        return userMapper.toUserDto(found);
+    public UserDto createUser(UserDto userDto) {
+        checkUserExistence(userDto.getEmail());
+        log.info("Пользователь создан");
+        return userRepository.createUser(userDto);
     }
 
     @Override
-    public UserDto delete(Long userId) {
-        User deleted = userRepository.getReferenceById(userId);
-        userRepository.delete(deleted);
-        log.debug("Deleted: {}: ", deleted);
-        return userMapper.toUserDto(deleted);
+    public UserDto updateUser(long userId, UserDto userDto) {
+        if (userDto.getEmail() != null) checkUserExistence(userDto.getEmail());
+        log.info("Пользователь обновлён");
+        return userRepository.updateUser(userId, userDto);
     }
 
     @Override
-    public List<UserDto> findAll() {
-        List<User> foundEntity = userRepository.findAll();
-        List<UserDto> found = new ArrayList<>();
-        foundEntity.forEach(User -> found.add(userMapper.toUserDto(User)));
-        return found;
+    public void delete(long userId) {
+        log.info("Пользователь удален", userId);
+        userRepository.delete(userId);
     }
 
-    public boolean checkEmail(String email) {
-        return findAll().stream().map(UserDto::getEmail).filter(email::equals).findFirst().isPresent();
+    private void checkUserExistence(String email) {
+        List<User> users = userRepository.findAll();
+        boolean userExistence = users.stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+        if (userExistence) {
+            log.warn("Пользователь уже существует");
+            throw new ValidationException("Пользователь уже существует");
+        }
     }
 }

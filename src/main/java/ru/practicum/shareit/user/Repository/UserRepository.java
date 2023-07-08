@@ -1,14 +1,15 @@
-package ru.practicum.shareit.user.Service;
+package ru.practicum.shareit.user.Repository;
 
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface UserService {
+public interface UserRepository {
     List<User> findAll();
 
-    User getUserById(long userId);
+    Optional<User> getUserById(long userId);
 
     UserDto createUser(UserDto userDto);
 
