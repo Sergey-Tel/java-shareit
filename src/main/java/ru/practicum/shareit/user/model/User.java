@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +15,7 @@ import javax.validation.constraints.NotBlank;
 public class User {
     private Long id;
     private String name;
-    @NotBlank @Email
+    @NotBlank
+    @Email
     private String email;
 }
