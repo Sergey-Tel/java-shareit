@@ -1,28 +1,21 @@
 package ru.practicum.shareit.request;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.user.model.User;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import ru.practicum.shareit.user.User;
+
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-item-requests.
- */
-@Getter
-@Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Data
+@Builder
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class ItemRequest {
-    long id;
-    @Size(min = 1, max = 200)
-    String description;
-    @NotBlank
-    User requestor;
-    @NotNull
-    LocalDateTime created;
+    private Long id;
+    private String description;     //текст запроса, содержащий описание требуемой вещи
+    private User requestor;         //пользователь, создавший запрос
+    private LocalDateTime created;  //дата и время создания запроса
 }

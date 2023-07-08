@@ -1,48 +1,56 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.Service.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.Create;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/items")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemController {
 
-    private final ItemService service;
-    private final String header = "X-Sharer-User-Id";
+    private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> findAll(@RequestHeader(header) long userId) {
-        return service.getAllItemsByUser(userId);
+    public List<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        return itemService.getAllItems(userId);
     }
 
-    @GetMapping("/{itemId}")
-    public ItemDto findItem(@PathVariable long itemId) {
-        return service.getItemById(itemId);
+    @GetMapping(value = "/{itemId}")
+    public ItemDto getItemById(@PathVariable Long itemId) {
+        return itemService.getItemById(itemId);
     }
 
-    @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam String text) {
-        return service.searchItem(text);
+    //POST /items - добавление новой вещи
+    @PostMapping
+    public ItemDto addNewItem(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId,
+                              @RequestBody @Valid ItemDto itemDto) {
+        return itemService.addNewItem(userId, itemDto);
     }
 
-    @PostMapping()
-    public ItemDto createItem(@RequestHeader(header) long userId, @Validated(Create.class) @RequestBody ItemDto itemDto) {
-        return service.createItem(userId, itemDto);
+    //PATCH /items/{itemId} - редактирование вещи
+    @PatchMapping(value = "/{itemId}")
+    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId,
+                              @PathVariable Long itemId,
+                              @RequestBody ItemDto itemDto) {
+        return itemService.updateItem(userId, itemId, itemDto);
     }
 
-    @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader(header) long userId, @PathVariable long itemId,@RequestBody ItemDto itemDto) {
-        return service.updateItem(userId, itemId, itemDto);
+    //DELETE /items/{itemId} - удаление вещи
+    @DeleteMapping("/{itemId}")
+    public void deleteItem(@RequestHeader("X-Sharer-User-Id") Long userId,
+                           @PathVariable Long itemId) {
+        itemService.deleteItem(userId, itemId);
     }
+
+    //GET /items/search?text={text}
+    @GetMapping("search")
+    public List<ItemDto> searchItems(@RequestParam String text) {
+        return itemService.searchItems(text);
+    }
+
 }

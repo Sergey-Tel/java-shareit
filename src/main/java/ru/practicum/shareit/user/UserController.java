@@ -1,49 +1,43 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
-
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.Service.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/users")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserController {
 
-    private final UserService service;
+    private final UserService userService;
 
     @GetMapping
-    public List<User> findAll() {
-        return service.findAll();
+    public List<UserDto> getAllUsers() {
+        return userService.getAllUsers();
     }
 
-    @GetMapping("/{userId}")
-    public User getUserById(@PathVariable long userId) {
-        return service.getUserById(userId);
+    @GetMapping(value = "/{id}")
+    public UserDto getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
     }
 
-    @PostMapping()
-    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-        return service.createUser(userDto);
+    @PostMapping
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
+        return userService.addUser(userDto);
     }
 
-    @PatchMapping("/{userId}")
-    public UserDto updateUser(@PathVariable long userId, @Validated(Update.class) @RequestBody UserDto userDto) {
-        return service.updateUser(userId,userDto);
+    @PatchMapping(value = "/{id}")
+    public UserDto update(@RequestBody UserDto userDto,
+                          @PathVariable Long id) {
+        return userService.updateUser(id, userDto);
     }
 
-    @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable long userId) {
-        service.delete(userId);
+    @DeleteMapping(value = "/{id}")
+    public void delete(@PathVariable Long id) {
+        userService.removeUser(id);
     }
+
 }
