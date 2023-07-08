@@ -1,43 +1,42 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.Create;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/users")
 @RequiredArgsConstructor
+@RequestMapping(path = "/users")
 public class UserController {
+
     private final UserService userService;
 
-    @PostMapping
-    public UserDto createUser(@Validated({Create.class}) @RequestBody UserDto userDto) {
-        return userService.createUser(userDto);
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable("id") Long userId) {
+        return ResponseEntity.ok().body(userService.getUser(userId));
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserDto>> getAll() {
+        return ResponseEntity.ok().body(userService.getAll());
     }
 
-    @GetMapping("{id}")
-    public UserDto getUserById(@PathVariable long id) {
-        return userService.findUserById(id);
+    @PostMapping
+    public ResponseEntity<UserDto> create(@Valid @RequestBody UserDto userDto) {
+        return ResponseEntity.ok().body(userService.create(userDto));
     }
 
-    @DeleteMapping("{id}")
-    public UserDto deleteUser(@PathVariable long id) {
-        return userService.deleteUserById(id);
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserDto> update(@PathVariable("id") Long userId, @Valid @RequestBody UserDto userDto) {
+        return ResponseEntity.ok().body(userService.update(userDto, userId));
     }
 
-    @PatchMapping("{id}")
-    public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable long id) {
-        return userService.updateUser(userDto, id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserDto> remove(@PathVariable("id") Long userId) {
+        return ResponseEntity.ok().body(userService.remove(userId));
     }
 }
-

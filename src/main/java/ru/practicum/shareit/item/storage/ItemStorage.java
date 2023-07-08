@@ -3,16 +3,16 @@ package ru.practicum.shareit.item.storage;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ItemStorage {
-    List<Item> getAllItemsByUserId(long userId);
 
-    Optional<Item> findItemById(long id);
+    Item create(Item item);
 
-    Item saveItem(Item item);
+    Item update(Item item, Long itemId, Long ownerId);
 
-    List<Item> searchItems(String word);
+    Item getItem(Long itemId);
 
-    Item deleteItem(long id);
+    List<Item> getItemsByOwner(Long ownerId);
+
+    List<Item> searchItem(String query);
 }

@@ -1,46 +1,44 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.Create;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/items")
 @RequiredArgsConstructor
+@RequestMapping("/items")
 public class ItemController {
+
     private final ItemService itemService;
+    private static final String OWNER = "X-Sharer-User-Id";
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader(ItemHeader.X_HEADER_NAME) @NotNull long userId,
-                              @RequestBody @Validated({Create.class}) ItemDto itemDto) {
-        return itemService.createItem(itemDto, userId);
+    public ResponseEntity<ItemDto> create(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
+        return ResponseEntity.ok().body(itemService.create(itemDto, ownerId));
     }
 
-    @GetMapping("{id}")
-    public ItemDto getItem(@PathVariable long id) {
-        return itemService.getItemById(id);
+    @PatchMapping("/{itemId}")
+    public ResponseEntity<ItemDto> update(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
+                          @RequestHeader(OWNER) Long ownerId) {
+        return ResponseEntity.ok().body(itemService.update(itemDto, itemId, ownerId));
+    }
+
+    @GetMapping("/{itemId}")
+    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
+        return ResponseEntity.ok().body(itemService.getItem(itemId));
     }
 
     @GetMapping
-    public List<ItemDto> getAllUserItems(@RequestHeader(ItemHeader.X_HEADER_NAME) @NotNull long userId) {
-        return itemService.getAllItemsByUserId(userId);
+    public ResponseEntity<List<ItemDto>> getItemsByOwner(@RequestHeader(OWNER) Long ownerId) {
+        return ResponseEntity.ok().body(itemService.getItemsByOwner(ownerId));
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItems(@RequestParam(name = "text", defaultValue = "") String word) {
-        return itemService.searchItems(word);
+    public ResponseEntity<List<ItemDto>> searchItem(@RequestParam String text) {
+        return ResponseEntity.ok().body(itemService.searchItem(text));
     }
-
-    @PatchMapping("{id}")
-    public ItemDto updateItem(@RequestHeader(ItemHeader.X_HEADER_NAME) @NotNull long userId,
-                              @RequestBody ItemDto itemDto, @PathVariable long id) {
-        return itemService.updateItem(itemDto, id, userId);
-    }
-
 }

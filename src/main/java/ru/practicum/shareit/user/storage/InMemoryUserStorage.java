@@ -1,52 +1,90 @@
 package ru.practicum.shareit.user.storage;
 
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exceptions.ConflictException;
-import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exception.userExeption.ConflictUserException;
+import ru.practicum.shareit.exception.userExeption.UnknownUserException;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.validator.UserValidator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
-@Getter
+@Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private final Map<Long, User> userStorageMap = new HashMap<>();
-    private final Set<String> emailSet = new HashSet<>();
-    private long userId = 1;
 
-    private long setId() {
-        return userId++;
+    private final HashMap<Long, User> users = new HashMap<>();
+
+    @Override
+    public List<User> getAll() {
+        return new ArrayList<>(users.values());
     }
 
-    public User saveUser(User user) {
-        checkEmail(user);
-        if (user.getId() == 0) {
-            user.setId(setId());
+    @Override
+    public User getUser(Long userId) {
+        if (!users.containsKey(userId)) {
+            log.error("пользователя с id={} не существует", userId);
+            throw new UnknownUserException("попытка получить несуществующего пользователя");
         }
-        emailSet.add(user.getEmail());
-        userStorageMap.put(user.getId(), user);
+        return users.get(userId);
+    }
+
+    @Override
+    public User create(User user) {
+        checkEmailExist(user.getEmail());
+        UserValidator.validate(user);
+
+        users.put(user.getId(), user);
+        log.debug("Создан объект пользователя: {}", user);
         return user;
     }
 
-    public List<User> getAllUsers() {
-        return new ArrayList<>(userStorageMap.values());
+    @Override
+    public User update(User user, Long userId) {
+        if (user.getName() != null) {
+            UserValidator.loginValidate(user);
+        }
+
+        checkEmailExist(user.getEmail());
+
+        if (!users.containsKey(userId)) {
+            log.error("пользователя с id={} не существует", userId);
+            throw new UnknownUserException("попытка обновить несуществующего пользователя");
+        }
+
+        if (user.getName() != null) {
+            users.get(userId).setName(user.getName());
+        }
+
+        if (user.getEmail() != null) {
+            users.get(userId).setEmail(user.getEmail());
+        }
+
+        log.debug("Изменён объект пользователя: {}", user);
+        return users.get(userId);
     }
 
-    public Optional<User> getUserById(long id) {
-        return userStorageMap.containsKey(id) ? Optional.of(userStorageMap.get(id)) : Optional.empty();
-    }
-
-    public User deleteUser(long id) {
-        User user = getUserById(id).orElseThrow(() -> new NotFoundException(String.format("User %s not found", id)));
-        emailSet.remove(user.getEmail());
-        return userStorageMap.remove(id);
-    }
-
-    private void checkEmail(User user) {
-        if (emailSet.contains(user.getEmail())) {
-            throw new ConflictException("Email already used");
+    private void checkEmailExist(String email) {
+        if (email != null) {
+            for (long userId : users.keySet()) {
+                if (users.get(userId).getEmail().equals(email)) {
+                    throw new ConflictUserException("пользователь с таким email уже существует");
+                }
+            }
         }
     }
 
+    @Override
+    public User remove(Long userId) {
+        if (!users.containsKey(userId)) {
+            log.error("пользователя с id={} не существует", userId);
+            throw new UnknownUserException("попытка удалить несуществующего пользователя");
+        }
+        User removedUser = users.get(userId);
+        users.remove(userId);
+        log.debug("Удалён объект пользователя: {}", removedUser);
+        return removedUser;
+    }
 }
