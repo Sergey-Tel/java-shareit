@@ -51,16 +51,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NoSuchElementException("Ошибка обновления информации о вещи с id = " + itemId);
 
         Item updatedItem = toItem(itemDto);
-        if (updatedItem.getId() == null)
-            updatedItem.setId(itemId);
-        if (updatedItem.getName() == null)
-            updatedItem.setName(existItem.getName());
-        if (updatedItem.getDescription() == null)
-            updatedItem.setDescription(existItem.getDescription());
-        if (updatedItem.getAvailable() == null)
-            updatedItem.setAvailable(existItem.getAvailable());
-        if (updatedItem.getOwner() == null)
-            updatedItem.setOwner(existItem.getOwner());
+        ItemMapper.updateItemWithExistingValues(updatedItem, existItem);
 
         return toItemDto(itemRepository.updateItem(updatedItem));
     }
@@ -78,5 +69,6 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         return itemRepository.searchItems((text.toLowerCase())).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
+
 
 }

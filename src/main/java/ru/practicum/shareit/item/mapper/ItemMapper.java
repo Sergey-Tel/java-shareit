@@ -21,4 +21,17 @@ public class ItemMapper {
                 .available(itemDto.getAvailable())
                 .build();
     }
+
+    public static void updateItemWithExistingValues(Item updatedItem, Item existItem) {
+        if (updatedItem.getId() == null)
+            updatedItem.setId(existItem.getId());
+        if (updatedItem.getName() == null)
+            updatedItem.setName(existItem.getName());
+        if (updatedItem.getDescription() == null)
+            updatedItem.setDescription(existItem.getDescription());
+        if (updatedItem.getAvailable() == null)
+            updatedItem.setAvailable(existItem.getAvailable());
+        if (updatedItem.getOwner() == null)
+            updatedItem.setOwner(existItem.getOwner());
+    }
 }
