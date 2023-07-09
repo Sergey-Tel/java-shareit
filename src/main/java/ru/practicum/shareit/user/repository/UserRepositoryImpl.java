@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -39,14 +40,11 @@ public class UserRepositoryImpl implements UserRepository {
             log.info("Пользователь с таким id не найден: {}", user.getId());
             throw new NoSuchElementException("Пользователь с таким id не найден");
         }
-        User existUser = users.get(user.getId());
-        if (user.getName() == null)
-            user.setName(existUser.getName());
-        if (user.getEmail() == null)
-            user.setEmail(existUser.getEmail());
-        users.replace(user.getId(), user);
-        log.info("Обновлен пользователь: {}", user);
-        return user;
+        User existingUser = users.get(user.getId());
+        User updatedUser = UserMapper.updateExistingUser(user, existingUser);
+        users.replace(user.getId(), updatedUser);
+        log.info("Обновлен пользователь: {}", updatedUser);
+        return updatedUser;
     }
 
     @Override
@@ -64,5 +62,6 @@ public class UserRepositoryImpl implements UserRepository {
                 .filter(u -> u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId()))
                 .findFirst().isEmpty();
     }
+
 
 }
