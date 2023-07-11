@@ -14,18 +14,18 @@ public class UserMapper {
     }
 
     public static User toUser(UserDto userDto) {
-        User user = User.builder()
+        return User.builder()
                 .name(userDto.getName())
                 .email(userDto.getEmail())
                 .build();
+    }
 
-        if (user.getName() == null)
-            user.setName(userDto.getName());
+    public static User updateUser(User existingUser, UserDto userDto) {
+        User.UserBuilder userBuilder = User.builder()
+                .id(existingUser.getId())
+                .name(userDto.getName() != null ? userDto.getName() : existingUser.getName())
+                .email(userDto.getEmail() != null ? userDto.getEmail() : existingUser.getEmail());
 
-        if (user.getEmail() == null)
-            user.setEmail(userDto.getEmail());
-
-        return user;
-
+        return userBuilder.build();
     }
 }
