@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -19,20 +19,20 @@ import java.util.Objects;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;        //уникальный идентификатор комментария
+    private Long id;
 
     @Column(nullable = false, length = 512)
-    private String text;    //содержимое комментария
+    private String text;
 
     @ManyToOne
     @JoinColumn(name = "item_id")
-    Item item;              //вещь, к которой относится комментарий
+    Item item;
 
     @ManyToOne
     @JoinColumn(name = "author_id")
-    User author;            //автор комментария
+    User author;
 
-    LocalDateTime created;  //дата создания комментария
+    LocalDateTime created;
 
     @Override
     public boolean equals(Object o) {

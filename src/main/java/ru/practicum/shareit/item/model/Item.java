@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.model;
 import lombok.*;
 import org.hibernate.Hibernate;
 import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -22,13 +22,13 @@ public class Item {
     private Long id;
 
     @Column(nullable = false)
-    private String name;        //краткое название
+    private String name;
 
     @Column(nullable = false, length = 512)
-    private String description; //развёрнутое описание
+    private String description;
 
     @Column(name = "is_available", nullable = false)
-    private Boolean isAvailable; //статус о том, доступна или нет вещь для аренды
+    private Boolean isAvailable;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
@@ -36,8 +36,7 @@ public class Item {
 
     @ManyToOne
     @JoinColumn(name = "request_id")
-    private ItemRequest request; //если вещь была создана по запросу другого пользователя, то в этом
-                                 //поле будет храниться ссылка на соответствующий запрос
+    private ItemRequest request;
 
     @Override
     public boolean equals(Object o) {
