@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.user.controller.UserController;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.NoSuchElementException;
 
 @RestControllerAdvice(assignableTypes = {ItemController.class, UserController.class, BookingController.class})
 public class ErrorHandler {
