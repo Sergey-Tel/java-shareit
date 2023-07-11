@@ -32,7 +32,7 @@ public class Item {
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
-    private User owner; //владелец вещи
+    private User owner;
 
     @ManyToOne
     @JoinColumn(name = "request_id")

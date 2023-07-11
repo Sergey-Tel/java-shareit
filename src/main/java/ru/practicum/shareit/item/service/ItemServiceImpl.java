@@ -106,16 +106,7 @@ public class ItemServiceImpl implements ItemService {
         if (existItem.getOwner() != null && !id.equals(existItem.getOwner().getId()))
             throw new EntityNotFoundException("Ошибка обновления информации о вещи с id = " + existItem.getId());
         Item updatedItem = toItem(itemDto);
-        if (updatedItem.getId() == null)
-            updatedItem.setId(existItem.getId());
-        if (updatedItem.getName() == null)
-            updatedItem.setName(existItem.getName());
-        if (updatedItem.getDescription() == null)
-            updatedItem.setDescription(existItem.getDescription());
-        if (updatedItem.getIsAvailable() == null)
-            updatedItem.setIsAvailable(existItem.getIsAvailable());
-        if (updatedItem.getOwner() == null)
-            updatedItem.setOwner(existItem.getOwner());
+        ItemMapper.updateItemWithExistingValues(updatedItem, existItem);
         return toItemDto(itemRepository.save(updatedItem));
     }
 
