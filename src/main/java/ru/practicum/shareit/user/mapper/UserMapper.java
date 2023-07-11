@@ -14,17 +14,18 @@ public class UserMapper {
     }
 
     public static User toUser(UserDto userDto) {
-        return User.builder()
+        User user = User.builder()
                 .name(userDto.getName())
                 .email(userDto.getEmail())
                 .build();
-    }
 
-    public static User updateExistingUser(User user, User existingUser) {
         if (user.getName() == null)
-            user.setName(existingUser.getName());
+            user.setName(userDto.getName());
+
         if (user.getEmail() == null)
-            user.setEmail(existingUser.getEmail());
+            user.setEmail(userDto.getEmail());
+
         return user;
+
     }
 }

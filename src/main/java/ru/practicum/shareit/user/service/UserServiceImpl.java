@@ -42,10 +42,6 @@ public class UserServiceImpl implements UserService {
         User existUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
         User updatedUser = toUser(userDto);
-        if (updatedUser.getName() == null)
-            updatedUser.setName(existUser.getName());
-        if (updatedUser.getEmail() == null)
-            updatedUser.setEmail(existUser.getEmail());
         updatedUser.setId(existUser.getId());
         log.info("Обновлен пользователь с id: {}", existUser.getId());
         return toUserDto(userRepository.save(updatedUser));
