@@ -16,4 +16,3 @@ public class BookingShortForItem {
     LocalDateTime start;
     LocalDateTime end;
 }
-

@@ -22,4 +22,3 @@ public class BookingResponseDto {
     private UserDto booker;
     private BookingStatus status;
 }
-

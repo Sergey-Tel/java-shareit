@@ -1,11 +1,9 @@
-package ru.practicum.shareit.booking.model;
-
+package ru.practicum.shareit.booking;
 
 import lombok.*;
 import org.hibernate.Hibernate;
-import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -25,21 +23,21 @@ public class Booking {
     private Long id;
 
     @Column(name = "start_date")
-    private LocalDateTime start;
+    private LocalDateTime start; //дата и время начала бронирования
 
     @Column(name = "end_date")
-    private LocalDateTime end;
+    private LocalDateTime end; //дата и время конца бронирования
 
     @ManyToOne
     @JoinColumn(name = "item_id")
-    private Item item;
+    private Item item; //вещь, которую пользователь бронирует
 
     @ManyToOne
     @JoinColumn(name = "booker_id")
-    private User booker;
+    private User booker; //пользователь, который осуществляет бронирование
 
     @Enumerated(EnumType.STRING)
-    private BookingStatus status;
+    private BookingStatus status; //статус бронирования
 
     @Override
     public boolean equals(Object o) {

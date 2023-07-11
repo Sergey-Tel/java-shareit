@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.model;
+package ru.practicum.shareit.user;
 
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
+@ToString
 @Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
@@ -17,8 +18,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false, unique = true)
     private String email;
 
