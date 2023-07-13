@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingShortForItem;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.enums.BookingStatusEnumCondition;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
@@ -45,7 +45,7 @@ public class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         List<Item> items = itemRepository.findByOwnerOrderByIdAsc(user);
-        List<BookingShortForItem> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatus.APPROVED);
+        List<BookingShortForItem> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatusEnumCondition.APPROVED);
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : items) {
             ItemDto itemDto = toItemDto(item);
@@ -64,7 +64,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
         ItemDto itemDto = toItemDto(item);
         if (userId.equals(item.getOwner().getId())) {
-            List<BookingShortForItem> bookings = bookingRepository.findByItemAndStatus(item, BookingStatus.APPROVED);
+            List<BookingShortForItem> bookings = bookingRepository.findByItemAndStatus(item, BookingStatusEnumCondition.APPROVED);
             itemDto.setLastBooking(findLastBookingForItem(item, bookings));
             itemDto.setNextBooking(findNextBookingForItem(item, bookings));
         }
@@ -131,7 +131,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
-        BookingShortForItem booking = bookingRepository.findFirstByItemAndBookerAndStatus(item, user, BookingStatus.APPROVED);
+        BookingShortForItem booking = bookingRepository.findFirstByItemAndBookerAndStatus(item, user, BookingStatusEnumCondition.APPROVED);
         if (booking == null)
             throw new ValidationException("Нельзя оставить комментарий у вещи, которую не бронировал!");
         else if (booking.getEnd().isAfter(LocalDateTime.now()))

@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.enums.BookingStatusEnumCondition;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -39,7 +39,7 @@ public class Booking {
     private User booker;
 
     @Enumerated(EnumType.STRING)
-    private BookingStatus status;
+    private BookingStatusEnumCondition status;
 
     @Override
     public boolean equals(Object o) {

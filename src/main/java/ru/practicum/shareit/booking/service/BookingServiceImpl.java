@@ -2,10 +2,10 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.enums.BookingStatusEnumCondition;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.dto.BookingStatusDto;
+import ru.practicum.shareit.booking.enums.BookingStatusEnumStatus;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = toBooking(bookingRequestDto);
         booking.setBooker(user);
         booking.setItem(item);
-        booking.setStatus(BookingStatus.WAITING);
+        booking.setStatus(BookingStatusEnumCondition.WAITING);
         return toBookingDto(bookingRepository.save(booking));
     }
 
@@ -71,11 +71,11 @@ public class BookingServiceImpl implements BookingService {
             throw new EntityNotFoundException(
                     String.format("Изменение статуса бронирования для пользователя с id [%d] запрещено!", userId));
 
-        if ((isApproved && booking.getStatus().equals(BookingStatus.APPROVED)) ||
-                (!isApproved && booking.getStatus().equals(BookingStatus.REJECTED)))
+        if ((isApproved && booking.getStatus().equals(BookingStatusEnumCondition.APPROVED)) ||
+                (!isApproved && booking.getStatus().equals(BookingStatusEnumCondition.REJECTED)))
             throw new ValidationException("Статусы бронирования совпадают!");
 
-        booking.setStatus(Boolean.TRUE.equals(isApproved) ? BookingStatus.APPROVED : BookingStatus.REJECTED);
+        booking.setStatus(Boolean.TRUE.equals(isApproved) ? BookingStatusEnumCondition.APPROVED : BookingStatusEnumCondition.REJECTED);
         return toBookingDto(bookingRepository.save(booking));
     }
 
@@ -121,7 +121,7 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 bookings = new ArrayList<>(
                         bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId,
-                                BookingStatus.valueOf(state))
+                                BookingStatusEnumCondition.valueOf(state))
                 );
                 break;
 
@@ -157,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
             case WAITING:
             case REJECTED:
                 bookings.addAll(bookingRepository.findByItemInAndStatusOrderByStartDesc(items,
-                        BookingStatus.valueOf(state)));
+                        BookingStatusEnumCondition.valueOf(state)));
                 break;
             default: //ALL
                 bookings.addAll(bookingRepository.findByItemInOrderByStartDesc(items));
@@ -169,9 +169,9 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    private BookingStatusDto parseStatus(String state) {
+    private BookingStatusEnumStatus parseStatus(String state) {
         try {
-            return BookingStatusDto.valueOf(state);
+            return BookingStatusEnumStatus.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new ValidationException(String.format("Unknown state: %s", state));
         }

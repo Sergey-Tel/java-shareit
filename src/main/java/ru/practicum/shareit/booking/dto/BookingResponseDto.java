@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.enums.BookingStatusEnumCondition;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -20,6 +20,6 @@ public class BookingResponseDto {
     private LocalDateTime end;
     private ItemDto item;
     private UserDto booker;
-    private BookingStatus status;
+    private BookingStatusEnumCondition status;
 }
 
