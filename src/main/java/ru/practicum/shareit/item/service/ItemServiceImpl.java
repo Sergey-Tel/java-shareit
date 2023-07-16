@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingShortForItem;
-import ru.practicum.shareit.booking.enums.BookingStatusEnumCondition;
+import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
@@ -22,7 +22,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -45,15 +44,18 @@ public class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         List<Item> items = itemRepository.findByOwnerOrderByIdAsc(user);
-        List<BookingShortForItem> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatusEnumCondition.APPROVED);
-        List<ItemDto> itemDtos = new ArrayList<>();
-        for (Item item : items) {
-            ItemDto itemDto = toItemDto(item);
-            itemDto.setLastBooking(findLastBookingForItem(item, bookings));
-            itemDto.setNextBooking(findNextBookingForItem(item, bookings));
-            itemDto.setComments(getCommentsByItem(item));
-            itemDtos.add(itemDto);
-        }
+        List<BookingShortForItem> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatus.APPROVED);
+        List<ItemDto> itemDtos = items.stream()
+                .map(item -> {
+                            ItemDto itemDto = toItemDto(item);
+                            itemDto.setLastBooking(findLastBookingForItem(item, bookings));
+                            itemDto.setNextBooking(findNextBookingForItem(item, bookings));
+                            itemDto.setComments(getCommentsByItem(item));
+                            return itemDto;
+                        }
+                )
+                .collect(Collectors.toList());
+
         return itemDtos;
     }
 
@@ -64,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
         ItemDto itemDto = toItemDto(item);
         if (userId.equals(item.getOwner().getId())) {
-            List<BookingShortForItem> bookings = bookingRepository.findByItemAndStatus(item, BookingStatusEnumCondition.APPROVED);
+            List<BookingShortForItem> bookings = bookingRepository.findByItemAndStatus(item, BookingStatus.APPROVED);
             itemDto.setLastBooking(findLastBookingForItem(item, bookings));
             itemDto.setNextBooking(findNextBookingForItem(item, bookings));
         }
@@ -131,17 +133,12 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
-        BookingShortForItem booking = bookingRepository.findFirstByItemAndBookerAndStatus(item, user, BookingStatusEnumCondition.APPROVED);
+        BookingShortForItem booking = bookingRepository.findFirstByItemAndBookerAndStatus(item, user, BookingStatus.APPROVED);
         if (booking == null)
             throw new ValidationException("Нельзя оставить комментарий у вещи, которую не бронировал!");
         else if (booking.getEnd().isAfter(LocalDateTime.now()))
             throw new ValidationException("Срок аренды ещё не завершился!");
-        Comment comment = Comment.builder()
-                .item(item)
-                .text(text.getText())
-                .author(user)
-                .created(LocalDateTime.now())
-                .build();
+        Comment comment = CommentMapper.toComment(text, item, user);
         commentRepository.save(comment);
         return toCommentDto(comment);
     }

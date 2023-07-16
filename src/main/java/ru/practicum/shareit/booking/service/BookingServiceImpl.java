@@ -2,13 +2,15 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.enums.BookingStatusEnumCondition;
+import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.enums.BookingStatusEnumStatus;
+import ru.practicum.shareit.booking.enums.BookingRequestStatus;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.service.chain.FinderByBooker;
+import ru.practicum.shareit.booking.service.chain.FinderByOwner;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
@@ -18,8 +20,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.persistence.EntityNotFoundException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -41,22 +41,17 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Item item = itemRepository.findById(bookingRequestDto.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException(bookingRequestDto.getItemId()));
-        if (item.getOwner() != null && userId.equals(item.getOwner().getId()))
+        if (userId.equals(item.getOwner().getId()))
             throw new EntityNotFoundException("Нельзя забронировать свою вешь!");
         if (Boolean.FALSE.equals(item.getIsAvailable()))
             throw new ValidationException(String.format("Вещь с id [%d] недоступна!", item.getId()));
-        if (bookingRequestDto.getStart() == null ||
-                bookingRequestDto.getEnd() == null ||
-                bookingRequestDto.getStart().isBefore(LocalDateTime.now()) ||
-                bookingRequestDto.getEnd().isBefore(LocalDateTime.now()) ||
-                bookingRequestDto.getEnd().isBefore(bookingRequestDto.getStart()) ||
-                bookingRequestDto.getStart().isEqual(bookingRequestDto.getEnd()))
+        if (!bookingRequestDto.getEnd().isAfter(bookingRequestDto.getStart()))
             throw new ValidationException("Даты бронирования указаны некорректно!");
 
         Booking booking = toBooking(bookingRequestDto);
         booking.setBooker(user);
         booking.setItem(item);
-        booking.setStatus(BookingStatusEnumCondition.WAITING);
+        booking.setStatus(BookingStatus.WAITING);
         return toBookingDto(bookingRepository.save(booking));
     }
 
@@ -71,11 +66,11 @@ public class BookingServiceImpl implements BookingService {
             throw new EntityNotFoundException(
                     String.format("Изменение статуса бронирования для пользователя с id [%d] запрещено!", userId));
 
-        if ((isApproved && booking.getStatus().equals(BookingStatusEnumCondition.APPROVED)) ||
-                (!isApproved && booking.getStatus().equals(BookingStatusEnumCondition.REJECTED)))
+        if ((isApproved && booking.getStatus().equals(BookingStatus.APPROVED)) ||
+                (!isApproved && booking.getStatus().equals(BookingStatus.REJECTED)))
             throw new ValidationException("Статусы бронирования совпадают!");
 
-        booking.setStatus(Boolean.TRUE.equals(isApproved) ? BookingStatusEnumCondition.APPROVED : BookingStatusEnumCondition.REJECTED);
+        booking.setStatus(Boolean.TRUE.equals(isApproved) ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return toBookingDto(bookingRepository.save(booking));
     }
 
@@ -96,38 +91,8 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getAllBookings(Long userId, String state) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        List<Booking> bookings;
-        switch (parseStatus(state)) {
-            case PAST:
-                bookings = new ArrayList<>(
-                        bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now())
-                );
-                break;
-
-            case FUTURE:
-                bookings = new ArrayList<>(
-                        bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now())
-                );
-                break;
-
-            case CURRENT:
-                bookings = new ArrayList<>(
-                        bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartAsc(userId,
-                                LocalDateTime.now(), LocalDateTime.now())
-                );
-                break;
-
-            case WAITING:
-            case REJECTED:
-                bookings = new ArrayList<>(
-                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId,
-                                BookingStatusEnumCondition.valueOf(state))
-                );
-                break;
-
-            default: //ALL
-                bookings = new ArrayList<>(bookingRepository.findByBookerIdOrderByStartDesc(userId));
-        }
+        List<Booking> bookings = FinderByBooker.getFinder()
+                .find(bookingRepository, userId, BookingRequestStatus.getStatus(state));
 
         return bookings
                 .stream()
@@ -139,29 +104,8 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getAllBookingsForOwner(Long userId, String state) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        List<Item> items = itemRepository.findByOwnerOrderByIdAsc(user);
-        List<Booking> bookings = new ArrayList<>();
-        switch (parseStatus(state)) {
-            case PAST:
-                bookings.addAll(bookingRepository.findByItemInAndEndIsBeforeOrderByStartDesc(items, LocalDateTime.now()));
-                break;
-            case FUTURE:
-                bookings.addAll(bookingRepository.findByItemInAndStartIsAfterOrderByStartDesc(items, LocalDateTime.now()));
-                break;
-
-            case CURRENT:
-                bookings.addAll(bookingRepository.findByItemInAndStartIsBeforeAndEndIsAfterOrderByStartDesc(items,
-                        LocalDateTime.now(), LocalDateTime.now()));
-                break;
-
-            case WAITING:
-            case REJECTED:
-                bookings.addAll(bookingRepository.findByItemInAndStatusOrderByStartDesc(items,
-                        BookingStatusEnumCondition.valueOf(state)));
-                break;
-            default: //ALL
-                bookings.addAll(bookingRepository.findByItemInOrderByStartDesc(items));
-        }
+        List<Booking> bookings = FinderByOwner.getFinder()
+                .find(bookingRepository, userId, BookingRequestStatus.getStatus(state));
 
         return bookings
                 .stream()
@@ -169,12 +113,5 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    private BookingStatusEnumStatus parseStatus(String state) {
-        try {
-            return BookingStatusEnumStatus.valueOf(state);
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException(String.format("Unknown state: %s", state));
-        }
-    }
 }
 
