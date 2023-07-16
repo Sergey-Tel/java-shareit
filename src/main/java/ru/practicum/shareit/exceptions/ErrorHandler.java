@@ -1,5 +1,6 @@
 package ru.practicum.shareit.exceptions;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,6 +12,7 @@ import ru.practicum.shareit.user.controller.UserController;
 
 import javax.persistence.EntityNotFoundException;
 
+@Slf4j
 @RestControllerAdvice(assignableTypes = {ItemController.class, UserController.class, BookingController.class})
 public class ErrorHandler {
 
@@ -39,6 +41,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
+        log.error("Exception", e);
         return new ErrorResponse("Произошла непредвиденная ошибка");
     }
 }

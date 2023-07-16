@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
-import ru.practicum.shareit.booking.enums.BookingStatusEnumCondition;
+import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -24,10 +24,10 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date", nullable = false)
     private LocalDateTime start;
 
-    @Column(name = "end_date")
+    @Column(name = "end_date", nullable = false)
     private LocalDateTime end;
 
     @ManyToOne
@@ -39,7 +39,7 @@ public class Booking {
     private User booker;
 
     @Enumerated(EnumType.STRING)
-    private BookingStatusEnumCondition status;
+    private BookingStatus status;
 
     @Override
     public boolean equals(Object o) {
