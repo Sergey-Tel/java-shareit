@@ -2,15 +2,14 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.enums.BookingRequestStatus;
+import ru.practicum.shareit.booking.service.search.*;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
-import ru.practicum.shareit.booking.enums.BookingRequestStatus;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.chain.FinderByBooker;
-import ru.practicum.shareit.booking.service.chain.FinderByOwner;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
@@ -91,8 +90,14 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getAllBookings(Long userId, String state) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        List<Booking> bookings = FinderByBooker.getFinder(bookingRepository)
-                .find(BookingRequestStatus.getStatus(state), userId);
+        List<Booking> bookings = BookingSearcher.link(
+                new BookerIdAndEndIsBeforeOrderByStartDescHandler(bookingRepository),
+                new BookerIdAndStartIsAfterOrderByStartDescHandler(bookingRepository),
+                new BookerIdAndStartIsBeforeAndEndIsAfterOrderByStartAscHandler(bookingRepository),
+                new BookerIdAndStatusRejectedOrderByStartDescHandler(bookingRepository),
+                new BookerIdAndStatusWaitingOrderByStartDescHandler(bookingRepository),
+                new BookerIdOrderByStartDescHandler(bookingRepository)
+        ).find(BookingRequestStatus.getStatus(state), userId);
 
         return bookings
                 .stream()
@@ -104,8 +109,14 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getAllBookingsForOwner(Long userId, String state) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        List<Booking> bookings = FinderByOwner.getFinder(bookingRepository)
-                .find(BookingRequestStatus.getStatus(state), userId);
+        List<Booking> bookings = BookingSearcher.link(
+                new ItemOwnerIdAndEndIsBeforeOrderByStartDescHandler(bookingRepository),
+                new ItemOwnerIdAndStartIsAfterOrderByStartDescHandler(bookingRepository),
+                new ItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDescHandler(bookingRepository),
+                new ItemOwnerIdAndStatusWaitingOrderByStartDescHandler(bookingRepository),
+                new ItemOwnerIdAndStatusRejectedOrderByStartDescHandler(bookingRepository),
+                new ItemOwnerIdOrderByStartDescHandler(bookingRepository)
+        ).find(BookingRequestStatus.getStatus(state), userId);
 
         return bookings
                 .stream()
