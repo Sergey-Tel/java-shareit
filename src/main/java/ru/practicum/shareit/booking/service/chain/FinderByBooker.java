@@ -13,63 +13,65 @@ import static ru.practicum.shareit.booking.enums.BookingRequestStatus.*;
 public class FinderByBooker {
     private BookingFinder first = null;
 
-    public FinderByBooker() {
+    public FinderByBooker(BookingRepository bookingRepository) {
         // PAST
-        first = new BookingFinder() {
+        first = new BookingFinder(bookingRepository, PAST) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long userId, BookingRequestStatus state) {
-                if (state == PAST) {
-                    return bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
-                }
-                return next(bookingRepository, userId, state);
+            public List<Booking> findBookings(long userId) {
+                return bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
             }
         };
 
         // FUTURE
-        first.add(new BookingFinder() {
+        first.add(new BookingFinder(bookingRepository, FUTURE) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long userId, BookingRequestStatus state) {
-                if (state == FUTURE) {
-                    return bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
-                }
-                return next(bookingRepository, userId, state);
+            public List<Booking> findBookings(long userId) {
+                return bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
             }
         });
 
         // CURRENT
-        first.add(new BookingFinder() {
+        first.add(new BookingFinder(bookingRepository, CURRENT) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long userId, BookingRequestStatus state) {
-                if (state == CURRENT) {
-                    return bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartAsc(userId,
-                            LocalDateTime.now(), LocalDateTime.now());
-                }
-                return next(bookingRepository, userId, state);
+            public List<Booking> findBookings(long userId) {
+                return bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartAsc(userId,
+                        LocalDateTime.now(), LocalDateTime.now());
             }
         });
 
-        // WAITING, REJECTED
-        first.add(new BookingFinder() {
+        // WAITING
+        first.add(new BookingFinder(bookingRepository, WAITING) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long userId, BookingRequestStatus state) {
-                if (state == WAITING || state == REJECTED) {
-                    return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId,
-                            BookingStatus.valueOf(state.name()));
-                }
-                return next(bookingRepository, userId, state);
+            public List<Booking> findBookings(long userId) {
+                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId,
+                        BookingStatus.WAITING);
+            }
+        });
+
+        // REJECTED
+        first.add(new BookingFinder(bookingRepository, REJECTED) {
+            @Override
+            public List<Booking> findBookings(long userId) {
+                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId,
+                        BookingStatus.REJECTED);
             }
         });
 
         // ALL
-        first.add(new BookingFinder() {
+        first.add(new BookingFinder(bookingRepository) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long userId, BookingRequestStatus state) {
+            public boolean isCorrectStatus(BookingRequestStatus status) {
+                return true;
+            }
+
+            @Override
+            public List<Booking> findBookings(long userId) {
                 return bookingRepository.findByBookerIdOrderByStartDesc(userId);
             }
         });
     }
 
-    public static BookingFinder getFinder() {
-        return (new FinderByBooker()).first;
+    public static BookingFinder getFinder(BookingRepository bookingRepository) {
+        return (new FinderByBooker(bookingRepository)).first;
     }
 }

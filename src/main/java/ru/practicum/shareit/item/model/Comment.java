@@ -26,13 +26,13 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "item_id")
-    Item item;
+    private Item item;
 
     @ManyToOne
     @JoinColumn(name = "author_id")
-    User author;
+    private User author;
 
-    LocalDateTime created;
+    private LocalDateTime created;
 
     @Override
     public boolean equals(Object o) {

@@ -91,8 +91,8 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getAllBookings(Long userId, String state) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        List<Booking> bookings = FinderByBooker.getFinder()
-                .find(bookingRepository, userId, BookingRequestStatus.getStatus(state));
+        List<Booking> bookings = FinderByBooker.getFinder(bookingRepository)
+                .find(BookingRequestStatus.getStatus(state), userId);
 
         return bookings
                 .stream()
@@ -104,8 +104,8 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingResponseDto> getAllBookingsForOwner(Long userId, String state) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        List<Booking> bookings = FinderByOwner.getFinder()
-                .find(bookingRepository, userId, BookingRequestStatus.getStatus(state));
+        List<Booking> bookings = FinderByOwner.getFinder(bookingRepository)
+                .find(BookingRequestStatus.getStatus(state), userId);
 
         return bookings
                 .stream()

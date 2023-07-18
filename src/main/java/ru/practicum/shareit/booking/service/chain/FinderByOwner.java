@@ -13,62 +13,62 @@ import static ru.practicum.shareit.booking.enums.BookingRequestStatus.*;
 public class FinderByOwner {
     private BookingFinder first = null;
 
-    public FinderByOwner() {
+    public FinderByOwner(BookingRepository bookingRepository) {
         // PAST
-        first = new BookingFinder() {
+        first = new BookingFinder(bookingRepository, PAST) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long ownerId, BookingRequestStatus state) {
-                if (state == PAST) {
-                    return bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
-                }
-                return next(bookingRepository, ownerId, state);
+            public List<Booking> findBookings(long ownerId) {
+                return bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
             }
         };
 
         // FUTURE
-        first.add(new BookingFinder() {
+        first.add(new BookingFinder(bookingRepository, FUTURE) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long ownerId, BookingRequestStatus state) {
-                if (state == FUTURE) {
-                    return bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(ownerId, LocalDateTime.now());
-                }
-                return next(bookingRepository, ownerId, state);
+            public List<Booking> findBookings(long ownerId) {
+                return bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(ownerId, LocalDateTime.now());
             }
         });
 
         // CURRENT
-        first.add(new BookingFinder() {
+        first.add(new BookingFinder(bookingRepository, CURRENT) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long ownerId, BookingRequestStatus state) {
-                if (state == CURRENT) {
-                    return bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
-                }
-                return next(bookingRepository, ownerId, state);
+            public List<Booking> findBookings(long ownerId) {
+                return bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now());
             }
         });
 
-        // WAITING, REJECTED
-        first.add(new BookingFinder() {
+        // WAITING
+        first.add(new BookingFinder(bookingRepository, WAITING) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long ownerId, BookingRequestStatus state) {
-                if (state == WAITING || state == REJECTED) {
-                    return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.valueOf(state.name()));
-                }
-                return next(bookingRepository, ownerId, state);
+            public List<Booking> findBookings(long ownerId) {
+                return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.WAITING);
+            }
+        });
+
+        // REJECTED
+        first.add(new BookingFinder(bookingRepository, REJECTED) {
+            @Override
+            public List<Booking> findBookings(long ownerId) {
+                return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.REJECTED);
             }
         });
 
         // ALL
-        first.add(new BookingFinder() {
+        first.add(new BookingFinder(bookingRepository) {
             @Override
-            public List<Booking> find(BookingRepository bookingRepository, Long ownerId, BookingRequestStatus state) {
+            public boolean isCorrectStatus(BookingRequestStatus status) {
+                return true;
+            }
+
+            @Override
+            public List<Booking> findBookings(long ownerId) {
                 return bookingRepository.findByItemOwnerIdOrderByStartDesc(ownerId);
             }
         });
     }
 
-    public static BookingFinder getFinder() {
-        return (new FinderByOwner()).first;
+    public static BookingFinder getFinder(BookingRepository bookingRepository) {
+        return (new FinderByOwner(bookingRepository)).first;
     }
-
 }
