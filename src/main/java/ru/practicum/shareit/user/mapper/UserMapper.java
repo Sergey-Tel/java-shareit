@@ -20,11 +20,12 @@ public class UserMapper {
                 .build();
     }
 
-    public static User updateExistingUser(User user, User existingUser) {
-        if (user.getName() == null)
-            user.setName(existingUser.getName());
-        if (user.getEmail() == null)
-            user.setEmail(existingUser.getEmail());
-        return user;
+    public static User updateUser(User existingUser, UserDto userDto) {
+        User.UserBuilder userBuilder = User.builder()
+                .id(existingUser.getId())
+                .name(userDto.getName() != null ? userDto.getName() : existingUser.getName())
+                .email(userDto.getEmail() != null ? userDto.getEmail() : existingUser.getEmail());
+
+        return userBuilder.build();
     }
 }
