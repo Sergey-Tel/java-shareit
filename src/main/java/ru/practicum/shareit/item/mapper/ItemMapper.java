@@ -3,6 +3,9 @@ package ru.practicum.shareit.item.mapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ItemMapper {
 
     public static ItemDto toItemDto(Item item) {
@@ -11,6 +14,7 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getIsAvailable())
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
                 .build();
     }
 
@@ -20,6 +24,14 @@ public class ItemMapper {
                 .description(itemDto.getDescription())
                 .isAvailable(itemDto.getAvailable())
                 .build();
+    }
+
+    public static List<ItemDto> toItemDto(Iterable<Item> items) {
+        List<ItemDto> dtos = new ArrayList<>();
+        for (Item item : items) {
+            dtos.add(toItemDto(item));
+        }
+        return dtos;
     }
 
     public static void updateItemWithExistingValues(Item updatedItem, Item existItem) {
