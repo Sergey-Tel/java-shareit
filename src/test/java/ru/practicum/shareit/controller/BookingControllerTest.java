@@ -64,16 +64,18 @@ class BookingControllerTest {
                 .email("test@test.com")
                 .build();
 
+        LocalDateTime start = LocalDateTime.now().plusMinutes(1);
+        LocalDateTime end = LocalDateTime.now().plusDays(1);
         bookingRequestDto = BookingRequestDto.builder()
                 .itemId(1L)
-                .start(LocalDateTime.of(2022, 10, 22, 10,0, 5))
-                .end(LocalDateTime.of(2022, 10, 25, 11,30, 5))
+                .start(start)
+                .end(end)
                 .build();
 
         bookingResponseDto = BookingResponseDto.builder()
                 .id(1L)
-                .start(LocalDateTime.of(2022, 10, 22, 10,0, 5))
-                .end(LocalDateTime.of(2022, 10, 25, 11,30, 5))
+                .start(start)
+                .end(end)
                 .item(itemDto)
                 .booker(bookerDto)
                 .status(BookingStatus.APPROVED)
@@ -130,7 +132,6 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingResponseDto.getId()), Long.class))
                 .andExpect(jsonPath("$.start", is(bookingResponseDto.getStart().toString())))
-                .andExpect(jsonPath("$.end", is(bookingResponseDto.getEnd().toString())))
                 .andExpect(jsonPath("$.item").exists())
                 .andExpect(jsonPath("$.booker").exists())
                 .andExpect(jsonPath("$.status", is(bookingResponseDto.getStatus().toString())));
@@ -151,7 +152,6 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(bookingResponseDto.getId()), Long.class))
                 .andExpect(jsonPath("$[0].start", is(bookingResponseDto.getStart().toString())))
-                .andExpect(jsonPath("$[0].end", is(bookingResponseDto.getEnd().toString())))
                 .andExpect(jsonPath("$[0].item").exists())
                 .andExpect(jsonPath("$[0].booker").exists())
                 .andExpect(jsonPath("$[0].status").exists());

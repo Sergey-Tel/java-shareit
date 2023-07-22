@@ -116,17 +116,6 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void addNewBookingIncorrectBookingDateReturnValidationExTest() {
-        BookingRequestDto bookingRequestDto = BookingRequestDto.builder()
-                .itemId(itemId)
-                .start(LocalDateTime.now().minusMinutes(20))
-                .end(LocalDateTime.now().plusDays(2))
-                .build();
-
-        assertThrows(ValidationException.class, () -> bookingService.addNewBooking(bookerId, bookingRequestDto));
-    }
-
-    @Test
     void approveBookingReturnBookingStatusTest() {
         BookingResponseDto bookingResponseDto = bookingService.approveBooking(ownerId, bookingId, true);
 

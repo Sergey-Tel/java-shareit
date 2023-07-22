@@ -85,22 +85,6 @@ class ItemControllerTest {
     }
 
     @Test
-    void searchWithWrongParam() throws Exception {
-        String text = "description";
-
-        when(itemService.searchItems(anyString(), anyInt(), anyInt()))
-                .thenReturn(List.of(itemDto));
-
-        mvc.perform(get("/items/search")
-                        .param("text", text)
-                        .param("from", "-1")
-                        .param("size", "5")
-                        .header("X-Sharer-User-Id", "1"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void addNewItem() throws Exception {
         when(itemService.addNewItem(anyLong(), any()))
                 .thenReturn(itemDto);

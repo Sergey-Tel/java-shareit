@@ -20,8 +20,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByBookerIdAndStatusOrderByStartDesc(Long bookerId, BookingStatus status, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartAsc(Long bookerId, LocalDateTime start,
-                                                                             LocalDateTime end, Pageable pageable);
+    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByIdAsc(Long bookerId, LocalDateTime start,
+                                                                          LocalDateTime end, Pageable pageable);
 
     List<Booking> findByItemInOrderByStartDesc(List<Item> items, Pageable pageable);
 
@@ -34,16 +34,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByItemInAndStartIsBeforeAndEndIsAfterOrderByStartDesc(List<Item> items, LocalDateTime start,
                                                                             LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdOrderByStartDesc(Long owner);
+    List<Booking> findByItemOwnerIdOrderByStartDesc(Long owner, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(Long owner, LocalDateTime end);
+    List<Booking> findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(Long owner, LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdAndStartIsAfterOrderByStartDesc(Long owner, LocalDateTime start);
+    List<Booking> findByItemOwnerIdAndStartIsAfterOrderByStartDesc(Long owner, LocalDateTime start, Pageable pageable);
 
     List<Booking> findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(Long owner, LocalDateTime start,
-                                                                            LocalDateTime end);
+                                                                            LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(Long owner, BookingStatus status);
+    List<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(Long owner, BookingStatus status, Pageable pageable);
 
     List<BookingShortForItem> findByItemInAndStatus(List<Item> items, BookingStatus status);
 

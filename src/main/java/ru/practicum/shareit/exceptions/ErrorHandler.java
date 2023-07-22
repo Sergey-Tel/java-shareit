@@ -6,14 +6,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.booking.controller.BookingController;
-import ru.practicum.shareit.item.controller.ItemController;
-import ru.practicum.shareit.user.controller.UserController;
 
 import javax.persistence.EntityNotFoundException;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {ItemController.class, UserController.class, BookingController.class})
+@RestControllerAdvice
 public class ErrorHandler {
 
     @ExceptionHandler
@@ -31,6 +28,7 @@ public class ErrorHandler {
     @ExceptionHandler({
             UserNotFoundException.class,
             ItemNotFoundException.class,
+            RequestNotFoundException.class,
             EntityNotFoundException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)

@@ -26,10 +26,9 @@ public class ItemRequest {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "requestor_id")
+    @JoinColumn(name = "requestor_id", nullable = false)
     private User requestor;
 
-    @Transient
     private LocalDateTime created;
 
     @Override
