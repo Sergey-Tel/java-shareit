@@ -261,15 +261,21 @@ class ItemServiceImplTest {
         CommentRequestDto comment = CommentRequestDto.builder()
                 .text("Test comment")
                 .build();
+        LocalDateTime start = LocalDateTime.now().minusDays(20);
+        LocalDateTime end = LocalDateTime.now().minusDays(2);
         BookingShortForItem bookingShortForItem = BookingShortForItem.builder()
                 .bookerId(userId)
                 .itemId(itemId)
-                .start(LocalDateTime.now().minusDays(20))
-                .end(LocalDateTime.now().minusDays(2))
+                .start(start)
+                .end(end)
                 .build();
         when(bookingRepository.findFirstByItemAndBookerAndStatus(any(), any(), any()))
                 .thenReturn(bookingShortForItem);
 
+        Assertions.assertEquals(userId, bookingShortForItem.getBookerId());
+        Assertions.assertEquals(itemId, bookingShortForItem.getItemId());
+        Assertions.assertEquals(start, bookingShortForItem.getStart());
+        Assertions.assertEquals(end, bookingShortForItem.getEnd());
         Assertions.assertEquals(comment.getText(), itemService.addComment(userId, itemId, comment).getText(),
                 "Комментарии не совпадают");
     }

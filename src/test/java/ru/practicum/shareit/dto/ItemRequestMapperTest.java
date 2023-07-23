@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.practicum.shareit.request.mapper.ItemRequestMapper.toItemRequestResponseDto;
 
@@ -17,10 +18,11 @@ class ItemRequestMapperTest {
 
     @Test
     void toItemRequestResponseDtoTest() {
+        User user = User.builder().name("Test name").build();
         ItemRequest itemRequest = ItemRequest.builder()
                 .id(1L)
                 .description("Test item description")
-                .requestor(User.builder().name("Test name").build())
+                .requestor(user)
                 .created(LocalDateTime.of(2022, 10, 22, 10,0, 5))
                 .build();
         ItemDto itemDto = ItemDto.builder()
@@ -32,6 +34,8 @@ class ItemRequestMapperTest {
 
         assertEquals(itemRequest.getId(), itemRequestResponseDto.getId());
         assertEquals(itemRequest.getDescription(), itemRequestResponseDto.getDescription());
+        assertEquals(user, itemRequest.getRequestor());
+        assertNotNull(itemRequest.toString());
         assertEquals(itemRequest.getCreated(), itemRequestResponseDto.getCreated());
         assertEquals(itemDto.getName(), itemRequestResponseDto.getItems().get(0).getName());
     }

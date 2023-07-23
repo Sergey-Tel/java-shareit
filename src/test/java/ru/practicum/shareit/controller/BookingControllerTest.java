@@ -20,6 +20,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -49,6 +50,8 @@ class BookingControllerTest {
 
     private BookingRequestDto bookingRequestDto;
     private BookingResponseDto bookingResponseDto;
+
+    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @BeforeEach
     void setUp() {
@@ -96,8 +99,8 @@ class BookingControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingResponseDto.getId()), Long.class))
-                .andExpect(jsonPath("$.start", is(bookingResponseDto.getStart().toString())))
-                .andExpect(jsonPath("$.end", is(bookingResponseDto.getEnd().toString())))
+                .andExpect(jsonPath("$.start", is(bookingResponseDto.getStart().format(fmt))))
+                .andExpect(jsonPath("$.end", is(bookingResponseDto.getEnd().format(fmt))))
                 .andExpect(jsonPath("$.item").exists())
                 .andExpect(jsonPath("$.booker").exists())
                 .andExpect(jsonPath("$.status", is(bookingResponseDto.getStatus().toString())));
@@ -131,7 +134,8 @@ class BookingControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingResponseDto.getId()), Long.class))
-                .andExpect(jsonPath("$.start", is(bookingResponseDto.getStart().toString())))
+                .andExpect(jsonPath("$.start", is(bookingResponseDto.getStart().format(fmt))))
+                .andExpect(jsonPath("$.end", is(bookingResponseDto.getEnd().format(fmt))))
                 .andExpect(jsonPath("$.item").exists())
                 .andExpect(jsonPath("$.booker").exists())
                 .andExpect(jsonPath("$.status", is(bookingResponseDto.getStatus().toString())));
@@ -151,7 +155,8 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(bookingResponseDto.getId()), Long.class))
-                .andExpect(jsonPath("$[0].start", is(bookingResponseDto.getStart().toString())))
+                .andExpect(jsonPath("$[0].start", is(bookingResponseDto.getStart().format(fmt))))
+                .andExpect(jsonPath("$[0].end", is(bookingResponseDto.getEnd().format(fmt))))
                 .andExpect(jsonPath("$[0].item").exists())
                 .andExpect(jsonPath("$[0].booker").exists())
                 .andExpect(jsonPath("$[0].status").exists());
@@ -171,8 +176,8 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(bookingResponseDto.getId()), Long.class))
-                .andExpect(jsonPath("$[0].start", is(bookingResponseDto.getStart().toString())))
-                .andExpect(jsonPath("$[0].end", is(bookingResponseDto.getEnd().toString())))
+                .andExpect(jsonPath("$[0].start", is(bookingResponseDto.getStart().format(fmt))))
+                .andExpect(jsonPath("$[0].end", is(bookingResponseDto.getEnd().format(fmt))))
                 .andExpect(jsonPath("$[0].item").exists())
                 .andExpect(jsonPath("$[0].booker").exists())
                 .andExpect(jsonPath("$[0].status").exists());
