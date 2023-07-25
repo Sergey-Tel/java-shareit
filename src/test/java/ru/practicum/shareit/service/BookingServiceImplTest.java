@@ -43,13 +43,13 @@ class BookingServiceImplTest {
     private final UserService userService;
     private final ItemService itemService;
 
-    ItemDto itemDto;
-    UserDto userDto;
-    Long ownerId;
-    Long bookerId;
-    Long itemId;
-    BookingRequestDto bookingRequestDto;
-    Long bookingId;
+    private ItemDto itemDto;
+    private UserDto userDto;
+    private Long ownerId;
+    private Long bookerId;
+    private Long itemId;
+    private BookingRequestDto bookingRequestDto;
+    private Long bookingId;
 
 
     @BeforeEach

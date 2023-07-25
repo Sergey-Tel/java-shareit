@@ -27,10 +27,10 @@ class ItemRequestServiceImplTest {
     private final ItemRequestService itemRequestService;
     private final UserService userService;
 
-    ItemRequestDto itemRequestDto;
-    ItemRequestResponseDto itemRequestResponseDto;
-    UserDto userDto;
-    Long userId;
+    private ItemRequestDto itemRequestDto;
+    private ItemRequestResponseDto itemRequestResponseDto;
+    private UserDto userDto;
+    private Long userId;
 
     @BeforeEach
     void setUp() {

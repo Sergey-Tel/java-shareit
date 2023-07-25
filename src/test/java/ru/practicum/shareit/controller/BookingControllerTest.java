@@ -15,6 +15,7 @@ import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.common.Common;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -40,18 +41,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BookingControllerTest {
 
     @MockBean
-    BookingService bookingService;
+    private BookingService bookingService;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @Autowired
-    MockMvc mvc;
+    private MockMvc mvc;
 
     private BookingRequestDto bookingRequestDto;
     private BookingResponseDto bookingResponseDto;
 
-    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern(Common.DT_FORMAT);
 
     @BeforeEach
     void setUp() {
@@ -95,7 +96,7 @@ class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingResponseDto.getId()), Long.class))
@@ -113,7 +114,7 @@ class BookingControllerTest {
 
         mvc.perform(patch("/bookings/{bookingId}", 1)
                         .param("approved", "true")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingResponseDto.getId()), Long.class))
@@ -130,7 +131,7 @@ class BookingControllerTest {
                 .thenReturn(bookingResponseDto);
 
         mvc.perform(get("/bookings/{bookingId}", 1)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingResponseDto.getId()), Long.class))
@@ -150,7 +151,7 @@ class BookingControllerTest {
                         .param("state", "ALL")
                         .param("from", "0")
                         .param("size", "5")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -171,7 +172,7 @@ class BookingControllerTest {
                         .param("state", "ALL")
                         .param("from", "0")
                         .param("size", "5")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))

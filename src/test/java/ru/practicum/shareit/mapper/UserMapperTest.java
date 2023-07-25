@@ -1,11 +1,10 @@
-package ru.practicum.shareit.dto;
+package ru.practicum.shareit.mapper;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
 import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
 
@@ -48,7 +47,7 @@ class UserMapperTest {
                 .name("Test user name")
                 .email("test@test.com")
                 .build();
-        assertTrue(user1.equals(user2));
+        assertEquals(user1,user2);
     }
 
 }

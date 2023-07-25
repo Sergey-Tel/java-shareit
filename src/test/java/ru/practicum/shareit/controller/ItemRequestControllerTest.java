@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.common.Common;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
@@ -34,13 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ItemRequestControllerTest {
 
     @MockBean
-    ItemRequestService requestService;
+    private ItemRequestService requestService;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @Autowired
-    MockMvc mvc;
+    private MockMvc mvc;
 
     private ItemRequestResponseDto itemRequestResponseDto;
     private ItemRequestDto itemRequestDto;
@@ -67,7 +68,7 @@ class ItemRequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description", is(itemRequestResponseDto.getDescription())));
     }
@@ -78,7 +79,7 @@ class ItemRequestControllerTest {
                 .thenReturn(List.of(itemRequestResponseDto));
 
         mvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].description", is(itemRequestResponseDto.getDescription())));
@@ -92,7 +93,7 @@ class ItemRequestControllerTest {
         mvc.perform(get("/requests/all")
                         .param("from", "0")
                         .param("size", "5")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].description", is(itemRequestResponseDto.getDescription())));
@@ -106,7 +107,7 @@ class ItemRequestControllerTest {
         mvc.perform(get("/requests/{requestId}", 1L)
                         .param("from", "0")
                         .param("size", "5")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.description", is(itemRequestResponseDto.getDescription())));
     }

@@ -26,7 +26,9 @@ public class ItemRequestMapper {
         List<ItemRequestResponseDto> dtos = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             dtos.add(toItemRequestResponseDto(itemRequest,
-                    itemDtos.stream().filter(item -> item.getRequestId().equals(itemRequest.getId())).collect(Collectors.toList())
+                    itemDtos.stream()
+                            .filter(item -> item.getRequestId().equals(itemRequest.getId()))
+                            .collect(Collectors.toList())
             ));
         }
         return dtos;

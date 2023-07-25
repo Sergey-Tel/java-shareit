@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.ItemHeader;
+import ru.practicum.shareit.common.Common;
 import ru.practicum.shareit.item.dto.CommentRequestDto;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -21,33 +21,33 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> getAllItems(@RequestHeader(ItemHeader.X_HEADER_NAME) Long userId,
+    public List<ItemDto> getAllItems(@RequestHeader(Common.X_HEADER_NAME) Long userId,
                                      @RequestParam(defaultValue = "0", required = false) @PositiveOrZero int from,
                                      @RequestParam(defaultValue = "10", required = false) @Positive int size) {
         return itemService.getAllItems(userId, from, size);
     }
 
     @GetMapping(value = "/{itemId}")
-    public ItemDto getItemById(@RequestHeader(ItemHeader.X_HEADER_NAME) Long userId,
+    public ItemDto getItemById(@RequestHeader(Common.X_HEADER_NAME) Long userId,
                                @PathVariable Long itemId) {
         return itemService.getItemById(userId, itemId);
     }
 
     @PostMapping
-    public ItemDto addNewItem(@RequestHeader(ItemHeader.X_HEADER_NAME) Long userId,
+    public ItemDto addNewItem(@RequestHeader(Common.X_HEADER_NAME) Long userId,
                               @RequestBody @Validated ItemDto itemDto) {
         return itemService.addNewItem(userId, itemDto);
     }
 
     @PatchMapping(value = "/{itemId}")
-    public ItemDto updateItem(@RequestHeader(ItemHeader.X_HEADER_NAME) Long userId,
+    public ItemDto updateItem(@RequestHeader(Common.X_HEADER_NAME) Long userId,
                               @PathVariable Long itemId,
                               @RequestBody ItemDto itemDto) {
         return itemService.updateItem(userId, itemId, itemDto);
     }
 
     @DeleteMapping("/{itemId}")
-    public void deleteItem(@RequestHeader(ItemHeader.X_HEADER_NAME) Long userId,
+    public void deleteItem(@RequestHeader(Common.X_HEADER_NAME) Long userId,
                            @PathVariable Long itemId) {
         itemService.deleteItem(userId, itemId);
     }
@@ -60,7 +60,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentResponseDto addComment(@RequestHeader(ItemHeader.X_HEADER_NAME) Long userId,
+    public CommentResponseDto addComment(@RequestHeader(Common.X_HEADER_NAME) Long userId,
                                          @PathVariable Long itemId,
                                          @RequestBody @Validated CommentRequestDto text) {
         return itemService.addComment(userId, itemId, text);

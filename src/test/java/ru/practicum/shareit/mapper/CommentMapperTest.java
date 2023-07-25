@@ -1,4 +1,4 @@
-package ru.practicum.shareit.dto;
+package ru.practicum.shareit.mapper;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
@@ -8,7 +8,6 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.practicum.shareit.item.mapper.CommentMapper.toCommentDto;
 
 class CommentMapperTest {
@@ -43,7 +42,7 @@ class CommentMapperTest {
                 .text("Test comment")
                 .created(LocalDateTime.of(2022, 10, 22, 10,0, 5))
                 .build();
-        assertTrue(comment1.equals(comment2));
+        assertEquals(comment1,comment2);
     }
 
 }

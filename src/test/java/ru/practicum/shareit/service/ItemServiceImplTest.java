@@ -42,14 +42,14 @@ import static org.mockito.Mockito.when;
 class ItemServiceImplTest {
 
     @MockBean
-    BookingRepository bookingRepository;
+    private BookingRepository bookingRepository;
 
     private final ItemService itemService;
     private final UserService userService;
 
-    ItemDto itemDto;
-    ItemDto itemDto2;
-    UserDto userDto;
+    private ItemDto itemDto;
+    private ItemDto itemDto2;
+    private UserDto userDto;
 
     @BeforeEach
     void setUp() {

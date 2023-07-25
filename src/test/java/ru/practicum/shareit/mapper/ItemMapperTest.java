@@ -1,4 +1,4 @@
-package ru.practicum.shareit.dto;
+package ru.practicum.shareit.mapper;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItem;
 import static ru.practicum.shareit.item.mapper.ItemMapper.toItemDto;
 
@@ -92,7 +91,7 @@ class ItemMapperTest {
                 .isAvailable(true)
                 .request(ItemRequest.builder().id(1L).build())
                 .build();
-        assertTrue(item1.equals(item2));
+        assertEquals(item1,item2);
 
     }
 

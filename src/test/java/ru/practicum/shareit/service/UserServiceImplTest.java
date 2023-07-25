@@ -23,8 +23,8 @@ class UserServiceImplTest {
 
     private final UserService userService;
 
-    UserDto userDto;
-    UserDto userDto2;
+    private UserDto userDto;
+    private UserDto userDto2;
 
     @BeforeEach
     void setUp() {

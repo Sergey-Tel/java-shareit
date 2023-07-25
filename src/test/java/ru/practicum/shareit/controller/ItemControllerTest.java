@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.common.Common;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -35,13 +36,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ItemControllerTest {
 
     @MockBean
-    ItemService itemService;
+    private ItemService itemService;
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @Autowired
-    MockMvc mvc;
+    private MockMvc mvc;
 
     private ItemDto itemDto;
 
@@ -61,7 +62,7 @@ class ItemControllerTest {
                 .thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(itemDto.getId()), Long.class))
@@ -76,7 +77,7 @@ class ItemControllerTest {
                 .thenReturn(itemDto);
 
         mvc.perform(get("/items/{id}", 1)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
@@ -94,7 +95,7 @@ class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
@@ -118,7 +119,7 @@ class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(itemUpdatedDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(itemUpdatedDto.getName())))
@@ -129,7 +130,7 @@ class ItemControllerTest {
     @Test
     void deleteItem() throws Exception {
         mvc.perform(delete("/items/{itemId}", itemDto.getId())
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andExpect(status().isOk());
     }
 
@@ -144,7 +145,7 @@ class ItemControllerTest {
                         .param("text", text)
                         .param("from", "0")
                         .param("size", "5")
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -171,7 +172,7 @@ class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header(Common.X_HEADER_NAME, "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(commentResponseDto.getId()), Long.class))
