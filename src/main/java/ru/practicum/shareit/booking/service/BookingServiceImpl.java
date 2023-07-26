@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.enums.BookingRequestStatus;
 import ru.practicum.shareit.booking.service.search.*;
@@ -87,9 +90,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getAllBookings(Long userId, String state) {
+    public List<BookingResponseDto> getAllBookings(Long userId, String state, int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new ValidationException("from должно быть положительным, size больше 0");
+        }
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"));
         List<Booking> bookings = BookingSearcher.link(
                 new BookerIdAndEndIsBeforeOrderByStartDescHandler(bookingRepository),
                 new BookerIdAndStartIsAfterOrderByStartDescHandler(bookingRepository),
@@ -97,7 +104,7 @@ public class BookingServiceImpl implements BookingService {
                 new BookerIdAndStatusRejectedOrderByStartDescHandler(bookingRepository),
                 new BookerIdAndStatusWaitingOrderByStartDescHandler(bookingRepository),
                 new BookerIdOrderByStartDescHandler(bookingRepository)
-        ).find(BookingRequestStatus.getStatus(state), userId);
+        ).find(BookingRequestStatus.getStatus(state), userId, pageable);
 
         return bookings
                 .stream()
@@ -106,9 +113,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingResponseDto> getAllBookingsForOwner(Long userId, String state) {
+    public List<BookingResponseDto> getAllBookingsForOwner(Long userId, String state, int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new ValidationException("from должно быть положительным, size больше 0");
+        }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"));
         List<Booking> bookings = BookingSearcher.link(
                 new ItemOwnerIdAndEndIsBeforeOrderByStartDescHandler(bookingRepository),
                 new ItemOwnerIdAndStartIsAfterOrderByStartDescHandler(bookingRepository),
@@ -116,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
                 new ItemOwnerIdAndStatusWaitingOrderByStartDescHandler(bookingRepository),
                 new ItemOwnerIdAndStatusRejectedOrderByStartDescHandler(bookingRepository),
                 new ItemOwnerIdOrderByStartDescHandler(bookingRepository)
-        ).find(BookingRequestStatus.getStatus(state), userId);
+        ).find(BookingRequestStatus.getStatus(state), userId, pageable);
 
         return bookings
                 .stream()

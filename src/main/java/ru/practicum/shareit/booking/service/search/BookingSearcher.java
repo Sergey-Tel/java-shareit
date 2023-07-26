@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.enums.BookingRequestStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -18,18 +19,18 @@ public abstract class BookingSearcher {
 
     public abstract Boolean isCorrectState(BookingRequestStatus status);
 
-    public abstract List<Booking> findBookings(long userId);
+    public abstract List<Booking> findBookings(long userId, Pageable pageable);
 
-    public List<Booking> find(BookingRequestStatus status, long userId) {
+    public List<Booking> find(BookingRequestStatus status, long userId, Pageable pageable) {
         log.info("BookingSearcher.find({},{})", status, userId);
         if (isCorrectState(status)) {
             log.info("status {} correct by {}", status, getClass().getSimpleName());
-            return findBookings(userId);
+            return findBookings(userId, pageable);
         }
         if (next == null) {
             return new ArrayList<>();
         }
-        return next.find(status, userId);
+        return next.find(status, userId, pageable);
     }
 
     public static BookingSearcher link(BookingSearcher item1, BookingSearcher... item2) {
