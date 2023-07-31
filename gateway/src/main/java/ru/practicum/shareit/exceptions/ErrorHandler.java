@@ -1,5 +1,6 @@
 package ru.practicum.shareit.exceptions;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +17,7 @@ import javax.validation.ConstraintViolationException;
         UserController.class,
         BookingController.class,
         ItemRequestController.class})
+@Slf4j
 public class ErrorHandler {
 
     //400 - ошибка ручной валидации
@@ -43,6 +45,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
+        log.error("Exception", e);
         return new ErrorResponse("Произошла непредвиденная ошибка");
     }
 }
